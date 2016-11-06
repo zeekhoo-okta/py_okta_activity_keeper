@@ -1,0 +1,87 @@
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}{% endblock title %} - Okta Cronofy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- CSS -->
+    {% bootstrap_css %}
+
+    <!-- Custom CSS -->
+    <link href="{% static 'css/demo.css' %}" rel="stylesheet">
+
+
+    {% block head_js %}
+    {% endblock head_js %}
+
+    {% block head %}
+    {% endblock head %}
+
+    {% block page_css %}
+    {% endblock page_css %}
+  </head>
+
+  <body id="main_body">
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+
+        <div class="navbar-header">
+          {% if 'user_id' not in request.session %}
+            <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+          {% else %}
+            <a class="navbar-brand" href="{% url 'mytasks' %}">{{ request.session.login }}</a>
+          {% endif %}
+
+          <button type="button" class="navbar-toggle btn btn-link" data-toggle="collapse" data-target="#navbar-responsive-collapse">
+            <span class = "sr-only">Toggle navigation</span>
+            <span>Menu <b class = "caret"></b></span>
+          </button>
+        </div>
+
+        <div class="navbar-collapse collapse" id="navbar-responsive-collapse">
+          <ul class="nav navbar-nav">
+            {% if 'user_id' not in request.session %}
+              <li><a href="{% url 'home' %}">Login</a></li>
+            {% else %}
+              <li><a href="{% url 'logout' %}">Logout</a></li>
+            {% endif %}
+          </ul>
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'addtask' %}">New Activity</a></li>
+          </ul>
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'forcecom_oauth_auth' %}">SFDC OAuth</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+    {% bootstrap_messages %}
+    </div>
+
+    <div class="bg-fill">
+      {% block content %}
+      {% endblock content %}
+    </div>
+
+    <!-- JavaScript -->
+    {% bootstrap_javascript jquery=1 %}
+
+    {% block page_js %}{% endblock page_js %}
+
+  </body>
+
+</html>
+

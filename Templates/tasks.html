@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+
+{% block head_js %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="list-task" id="list_tasks">
+        <div id="import_btn" class="container-fluid">
+            <div class="row">
+                <div class="col-xs-offset-9 col-xs-3">
+                    <a href="{% url 'import_options' %}" class="btn btn-primary">Import</a>
+                </div>
+            </div>
+        </div>
+        {% for d in dates %}
+        <div id="date_border">
+            <p>{{ d }}</p>
+        </div>
+        <table id="task_tbl" class="table table-hover">
+            <tbody id="task_tbl_bd">
+                {% for t in tasks %}
+                {% if t.start_date_local == d %}
+                <tr id="row_{{ t.id }}">
+                    <td class="hidden">{{ t.id }}</td>
+                    <td id="summary_{{ t.id }}" class="col-xs-9"
+                        onclick="taskDetails({{ t.id }})">
+                        <table>
+                            <tr><td style="font-size:10px">{{ t.start_time }} - {{ t.end_time }}<br/></td></tr>
+                            <tr><td>{{ t.summary }}</td></tr>
+                            <tr id="desc_{{ t.id }}" class="hidden"><td style="font-size:11px">
+                                <br/>
+                                {% for detail in t.desc %}
+                                    {{ detail }}<br/>
+                                {% endfor %}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td id="actions_{{ t.id }}" class="col-xs-3">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'task' t.id %}" class="btn btn-default btn-sm">
+                                &nbsp;&nbsp;<span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;
+                            </a>
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li onclick="dismissTask({{ t.id }})"><a href="#">Admin</a></li>
+                                <li onclick="dismissTask({{ t.id }})"><a href="#">Travel</a></li>
+                                <li onclick="dismissTask({{ t.id }})"><a href="#">Marketing Event</a></li>
+                                <li onclick="dismissTask({{ t.id }})"><a href="#">Training</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li onclick="dismissTask({{ t.id }})"><a><span class="glyphicon glyphicon-remove-circle"></span>&nbsp;&nbsp;Dismiss</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+    <script type="text/javascript">
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+
+    function dismissTask(id) {
+        var xhttp = new XMLHttpRequest();
+        url = "/task/" + id + "/";
+        xhttp.onreadystatechange = function() {
+            var element = document.getElementById('row_' + id);
+            element.parentNode.removeChild(element);
+        }
+        xhttp.open("POST", url, true);
+        xhttp.setRequestHeader('X-CSRFToken', csrftoken);
+        xhttp.send();
+
+    }
+
+    function taskDetails(id) {
+        var buttonsDisplay = 'hidden';
+        if (document.getElementById('desc_' + id).className != 'hidden') {
+            buttonsDisplay = 'col-xs-3';
+
+
+            document.getElementById('desc_' + id).className = 'hidden';
+
+
+        } else {
+            document.getElementById('desc_' + id).className = 'x';
+        }
+
+
+        //re = /actions_\d+/i;
+        //var table = document.getElementById('task_tbl');
+        //for (var i = 0, row; row = table.rows[i]; i++) {
+        //    for (var j = 0, col; col = row.cells[j]; j++) {
+        //        if ( col.id.match(re) ) {
+        //            //col.className = buttonsDisplay;
+        //        }
+        //    }
+        //}
+    }
+
+    </script>
+{% endblock %}

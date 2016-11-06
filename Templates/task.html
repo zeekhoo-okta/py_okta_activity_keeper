@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Add Task{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="add-task">
+
+        <form class="form-horizontal" name="TaskForm" action="{% url 'task' id %}" method="post" role="form">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-default btn-sm">Submit</button>
+            <hr/>
+
+            {% for field in form.visible_fields %}
+            <div class="form-group {% if field.errors %} has-error {% endif %}">
+                <div class="col-sm-5">
+                    {{ field }}
+                </div>
+                <div class="help-block">
+                    {{ field.errors }}
+                </div>
+            </div>
+            {% endfor %}
+
+
+            <div class="form-group form-group-sm">
+                <label class="col-sm-1 control-label">Opportunity:  </label>
+                <div class="col-sm-4" id="selectedOp">
+                </div>
+            </div>
+            {% if token %}
+            <div class="form-group form-group-sm">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchOp" placeholder="Search">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default btn-sm" type="button" onclick="getRecent()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </form>
+
+    </div>
+
+    <table class = "table table-hover">
+        <thead id="tab_head">
+        </thead>
+        <tbody id="search_results">
+        </tbody>
+    </table>
+
+
+</div>
+{% endblock content %}
+
+{% block page_js %}
+    {{ form.media }}
+
+    <script type="text/javascript">
+    var tblHead = ["Opportunity","Stage","Close Date","Rep","Amount"];
+
+    var tblValues = [
+       "Vacasa (+1300 - FTE/Contractors) IT Products,2 - Discovery,12/9/2016,Schantell Tamara,25000.00",
+       "Tableau Software - Platform,3 - Scope,12/30/2016,Bavinger Will,500000.00",
+       "In-House Realty LLC-Platform-90 users to start,6 - Validate Solution,10/15/2016,Sloan Tison,15000.00",
+       "Weidner Apartment Homes-SSO UD 1400,2 - Discovery,11/30/2016,Bavinger Will,50000.00",
+       "CyberCoders-400 MFA,4 - Go / No-Go,10/31/2016,Bourne Kevin,10000.00",
+       "Shiftgig-2000SSO UD Prov,2 - Discovery,10/31/2016,Tison Sloan,7200.00"
+    ];
+
+    function getRecent() {
+        var xhttp = new XMLHttpRequest();
+        url = "/sfdc/recent/";
+        xhttp.onreadystatechange = function() {
+            var recents = JSON.parse(xhttp.responseText);
+            console.log(recents)
+            drawTable(recents);
+        }
+        xhttp.open("GET", url, false);
+        xhttp.send();
+    }
+
+    function drawTable(tableData) {
+        var i;
+        var draw = "";
+        for(i = 0; i < tableData.length; i++) {
+            draw += '<tr><td>' +
+            'ABC' +
+            '</td></tr>';
+        }
+        document.getElementById('search_results').innerHTML = draw;
+        document.getElementById('selectedOp').innerHTML = '';
+    }
+
+
+
+    function searchSfdc() {
+        var draw = '';
+        var arr = [];
+
+        var head = '<tr><td>' + tblHead.join('</td><td>') + '</td></tr>';
+        document.getElementById('tab_head').innerHTML = head;
+
+        for (var i=0; i < tblValues.length; i++) {
+          arr = tblValues[i].split(',');
+          draw += '<tr><td>' + arr.join('</td><td>') + '</td></tr>';
+        }
+        document.getElementById('search_results').innerHTML = draw;
+        document.getElementById('selectedOp').innerHTML = '';
+    }
+
+    var table = document.getElementsByTagName("table")[0];
+    var tbody = table.getElementsByTagName("tbody")[0];
+    tbody.onclick = function (e) {
+        e = e || window.event;
+        var target = e.srcElement || e.target;
+        while (target && target.nodeName !== "TR") {
+            target = target.parentNode;
+        }
+        if (target) {
+            var cells = target.getElementsByTagName("td");
+            op = cells[0].innerHTML;
+        }
+
+        document.getElementById('selectedOp').innerHTML = '<p class="form-control-static">' + op + '</p>';
+
+        document.getElementById('search_results').innerHTML = '';
+        document.getElementById('tab_head').innerHTML = '';
+    };
+
+    </script>
+{% endblock page_js %}

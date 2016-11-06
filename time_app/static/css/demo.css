@@ -1,0 +1,49 @@
+.bg-fill {
+    padding-top: 50px; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
+    padding-bottom: 50px;
+}
+
+.login-pg {
+    background-image: url('https://farm9.staticflickr.com/8332/8451032652_b2bf0bdadc_h.jpg');
+    background-repeat: no-repeat;
+    background-position: center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+
+    position: relative;
+    padding-top: 20px;
+    padding-bottom: 50%;
+}
+
+.add-task {
+    position: relative;
+    padding-top: 20px;
+}
+
+.list-task {
+    position: relative;
+    padding-top: 20px;
+}
+
+.import_form {
+    position: relative;
+    padding-top: 20px;
+}
+
+.temp {
+    position: relative;
+    padding-top: 10%;
+    padding-bottom: 15%;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.ref-lb {
+    color: #99d6ff;
+}
+
+.hidden {
+    display: none;
+}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Import Tasks{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="import_form">
+        <form class="form-inline" action="{% url 'import_tasks' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <div class="input-group">
+                        <div class="input-group-addon">Previous</div>
+                        <select class="form-control" name="ImportRange">
+                            <option>1 Weeks</option>
+                            <option>2 Weeks</option>
+                            <option>3 Weeks</option>
+                            <option>Month</option>
+                        </select>
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-primary">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
