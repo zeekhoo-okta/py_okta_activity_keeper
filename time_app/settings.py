@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 
 APP_URL = os.environ.get('APP_URL')
 
-OKTA_API_TOKEN = os.environ.get('OKTA_API_TOKEN')
 OKTA_ORG = os.environ.get('OKTA_ORG')
+# OKTA_API_TOKEN = os.environ.get('OKTA_API_TOKEN')
 
 SFDC_URL = os.environ.get('SFDC_URL')
 SFDC_API_VERSION = 'v38.0'
@@ -45,6 +45,7 @@ CRONOFY_API_URL = 'https://api.cronofy.com/v1'
 CRONOFY_AUTH_URL = 'https://app.cronofy.com/oauth'
 CRONOFY_CLIENT_ID = os.environ.get('CRONOFY_CLIENT_ID')
 CRONOFY_CLIENT_SECRET = os.environ.get('CRONOFY_CLIENT_SECRET')
+
 MYSQL_USER = os.environ.get('MYSQL_USER')
 MYSQL_USER_PWD = os.environ.get('MYSQL_USER_PWD')
 

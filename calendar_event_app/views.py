@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from calendar_event_app.api.StatusCodes import StatusCodes
 from forms import AddTaskForm, ImportTaskForm, PreferenceForm
@@ -19,7 +19,6 @@ from models import Task, UserPreference
 
 
 OKTA_ORG = ''.join(['https://', settings.OKTA_ORG])
-API_TOKEN = settings.OKTA_API_TOKEN
 SESSION_COOKIES = ['userId',
                    'user_id',
                    'login',
@@ -46,6 +45,7 @@ def login_session(request):
         # Set the okta session
         user_id = user['id']
         profile = user['profile']
+        print('profile = {}'.format(profile))
         if profile['firstName'] and profile['lastName']:
             name = profile['firstName'] + ' ' + profile['lastName']
         else:
@@ -56,13 +56,13 @@ def login_session(request):
             time_zone = None
 
         request.session['user_id'] = user_id
-        preference = UserPreference.objects.get(okta_user_id=user_id)
-        if not preference:
-            preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
-            preference.save()
-        else:
+        try:
+            preference = get_object_or_404(UserPreference, okta_user_id=user_id)
             preference.name = name
             preference.time_zone = time_zone
+            preference.save()
+        except Exception as e:
+            preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
             preference.save()
 
         if profile['login']:
