@@ -27,7 +27,7 @@
                 {% if t.start_date_local == d %}
                 <tr id="row_{{ t.id }}">
                     <td class="hidden">{{ t.id }}</td>
-                    <td id="summary_{{ t.id }}" class="col-xs-8"
+                    <td id="summary_{{ t.id }}" class="col-xs-6"
                         onclick="taskDetails({{ t.id }})">
                         <table>
                             <tr><td style="font-size:10px">{{ t.start_time }} - {{ t.end_time }}<br/></td></tr>
