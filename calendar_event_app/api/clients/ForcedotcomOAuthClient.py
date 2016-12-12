@@ -1,13 +1,8 @@
 import requests
-import six
 from django.conf import settings
 from ...api.errors import Unauthorized, APIError
 from ...api.utils import dict_to_query_params
 import json
-
-import ssl
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.poolmanager import PoolManager
 
 
 class ForcedotcomOAuthClient(object):
