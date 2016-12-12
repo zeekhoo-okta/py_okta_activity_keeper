@@ -24,7 +24,7 @@ SECRET_KEY = '***REMOVED***'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com']
 
 # Application definition
 
@@ -157,11 +157,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 STATICFILES_DIRS = [
-    # '/Users/zeekhoo/Projects/PyCharm/py_okta_activity_keeper/static',
     BASE_DIR + '/static',
 ]
-# STATIC_URL = '/static/'
-
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = "static"
+STATIC_ROOT = "/var/www/zeekhoo.com/static/"
