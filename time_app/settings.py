@@ -37,9 +37,9 @@ SFDC_URL = os.environ.get('SFDC_URL')
 SFDC_API_VERSION = 'v38.0'
 SFDC_CLIENT_ID = os.environ.get('SFDC_CLIENT_ID')
 SFDC_SECRET = os.environ.get('SFDC_SECRET')
-SFDC_USERNAME = os.environ.get('SFDC_USERNAME')
-SFDC_PASSWORD = os.environ.get('SFDC_PASSWORD')
-SFDC_TOKEN = os.environ.get('SFDC_SECURITY_TOKEN')
+# SFDC_USERNAME = os.environ.get('SFDC_USERNAME')
+# SFDC_PASSWORD = os.environ.get('SFDC_PASSWORD')
+# SFDC_TOKEN = os.environ.get('SFDC_SECURITY_TOKEN')
 
 CRONOFY_API_URL = 'https://api.cronofy.com/v1'
 CRONOFY_AUTH_URL = 'https://app.cronofy.com/oauth'
