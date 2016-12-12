@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
@@ -29,7 +28,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-APP_URL = 'https://localhost:8443'
+APP_URL = os.environ.get('APP_URL')
+
 OKTA_API_TOKEN = os.environ.get('OKTA_API_TOKEN')
 OKTA_ORG = os.environ.get('OKTA_ORG')
 
@@ -156,7 +156,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 STATICFILES_DIRS = [
-    '/Users/zeekhoo/Projects/PyCharm/py_okta_activity_keeper/time_app/static',
+    # '/Users/zeekhoo/Projects/PyCharm/py_okta_activity_keeper/static',
+    BASE_DIR + '/static',
 ]
+# STATIC_URL = '/static/'
+
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = "static"
