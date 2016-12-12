@@ -12,7 +12,6 @@
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -36,19 +35,22 @@
            urlParams[decode(match[1])] = decode(match[2]);
     })();
     var access_code = urlParams['code'];
-    console.log(access_code);
-
 
     var xhttp = new XMLHttpRequest();
-    url = "/sfdc/oauth/token/"
+    var url = "/sfdc/oauth/token/"
 
-    xhttp.onreadystatechange = function() {
-        window.location.href = '/';
-    }
-    xhttp.open("POST", url, false);
+    xhttp.open("POST", url);
     xhttp.setRequestHeader('X-CSRFToken', csrftoken);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.send(JSON.stringify({"code": access_code }));
+    xhttp.send(JSON.stringify({"code": access_code}));
+    xhttp.onreadystatechange = function() {
+        res = xhttp.status;
+        console.log(res);
+        if (res.status_code == 401) {
+            window.location.href = '/login';
+        }
+        window.location.href = '/sfdc/oauth/complete';
+    }
 
 
 </script>

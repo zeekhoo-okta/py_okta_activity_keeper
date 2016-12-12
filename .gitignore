@@ -1,3 +1,7 @@
 venv
 .idea
 .env
+migrations
+.DS_Store
+*.pyc
+__pycache__

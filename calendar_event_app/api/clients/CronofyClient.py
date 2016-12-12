@@ -26,7 +26,6 @@ class CronofyClient(object):
     def get_calendars(self):
         response = requests.get(self.base_url + '/calendars', headers=self.headers)
         status = int(float(response.status_code))
-        print('get_calendars STATUS: {}'.format(status))
         if status >= 400:
             if status == 401:
                 raise Unauthorized()

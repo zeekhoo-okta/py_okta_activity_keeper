@@ -29,11 +29,12 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-APP_URL = 'http://localhost:8000'
+APP_URL = 'https://localhost:8443'
 OKTA_API_TOKEN = os.environ.get('OKTA_API_TOKEN')
 OKTA_ORG = os.environ.get('OKTA_ORG')
 
-SFDC_URL = 'https://zeekhoo-dev-ed.my.salesforce.com'
+SFDC_URL = os.environ.get('SFDC_URL')
+SFDC_API_VERSION = 'v38.0'
 SFDC_CLIENT_ID = os.environ.get('SFDC_CLIENT_ID')
 SFDC_SECRET = os.environ.get('SFDC_SECRET')
 SFDC_USERNAME = os.environ.get('SFDC_USERNAME')
@@ -61,9 +62,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_forms_bootstrap',
     'bootstrap3_datepicker',
-    'rest_framework',
-
-    'simple_salesforce',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

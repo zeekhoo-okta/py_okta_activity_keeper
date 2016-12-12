@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Import Tasks{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="preference_form">
+        <form class="form-horizontal" action="{% url 'preferences' %}" method="post">
+            {% csrf_token %}
+
+            <div class="form-group {% if form.time_zone.errors %} has-error {% endif %}">
+                <p>{{ form.time_zone.errors }}</p>
+                <div class="col-sm-4">
+                    <label for="time_zone">Time Zone</label>
+                    <input type="text" class="form-control" id="time_zone" name="time_zone"
+                           value="{% if form.time_zone %}{{ form.time_zone }}{% endif %}" placeholder="e.g. America/Los_Angeles">
+                </div>
+            </div>
+
+            <div class="form-group">
+                {% if form.errors %}
+                <p>{{ form.non_field_errors }}</p>
+                {% endif %}
+                <div class="col-sm-offset-0 col-sm-4">
+                    <button type="submit" value="Set" class="btn btn-primary">Set</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

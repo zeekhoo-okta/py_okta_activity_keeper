@@ -16,10 +16,10 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from calendar_event_app.views import home_view, login_session, logout, api_view, task_view, my_tasks_view
+from calendar_event_app.views import home_view, login_session, logout, task_view, my_tasks_view, preferences
 from calendar_event_app.views import import_options_view, import_tasks, cronofy_oauth_callback, cronofy_access_token
-from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_oauth_auth, forcecom_recent
-
+from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
+from calendar_event_app.views import forcecom_auth_init, forcecom_auth_complete, forcecom_oauth_auth
 
 urlpatterns = [
     # django admin
@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^$', home_view, name='home'),
     url(r'^login/$', login_session, name='login'),
     url(r'^logout/$', logout, name='logout'),
+    url(r'^preferences/$', preferences, name='preferences'),
 
     # task
     url(r'^task/([a-zA-Z0-9]+)/$', task_view, name='task'),
@@ -45,9 +46,8 @@ urlpatterns = [
     # force.com
     url(r'^sfdc/oauth/callback/$', forcecom_oauth_callback, name='forcecom_oauth_callback'),
     url(r'^sfdc/oauth/token/$', forcecom_access_token, name='forcecom_access_token'),
-    url(r'^sfdc/oauth/auth/$', forcecom_oauth_auth, name='forcecom_oauth_auth'),
-    url(r'^sfdc/recent/$', forcecom_recent, name='forcecom_recent'),
-
-    # api view
-    url(r'^debug/$', api_view.as_view(), name='api_view'),
+    url(r'^sfdc/oauth/init/$', forcecom_auth_init, name='forcecom_auth_init'),
+    url(r'^sfdc/oauth/complete/$', forcecom_auth_complete, name='forcecom_auth_complete'),
+    url(r'^sfdc/oauth/auth/[0-9]*$', forcecom_oauth_auth, name='forcecom_oauth_auth'),
+    url(r'^sfdc/search/$', forcecom_search, name='forcecom_search'),
 ]

@@ -4,13 +4,13 @@
 }
 
 .login-pg {
-    background-image: url('https://farm9.staticflickr.com/8332/8451032652_b2bf0bdadc_h.jpg');
-    background-repeat: no-repeat;
+    background-image: url('https://s3-us-west-2.amazonaws.com/okta-activity-timekeeper/static/okta-mints.png');
+    background-repeat: repeat;
     background-position: center center fixed;
-    -webkit-background-size: cover;
+/*    -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
-    background-size: cover;
+    background-size: cover;*/
 
     position: relative;
     padding-top: 20px;
@@ -28,6 +28,11 @@
 }
 
 .import_form {
+    position: relative;
+    padding-top: 20px;
+}
+
+.preference_form {
     position: relative;
     padding-top: 20px;
 }

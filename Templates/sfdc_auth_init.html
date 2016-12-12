@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Salesforce Auth{% endblock %}
+{% block head %}
+Salesforce Auth
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Please sign-in to Salesforce</h3>
+    <a href="{% url 'forcecom_oauth_auth' %}" class="btn btn-primary">Continue</a>
+    <a href="{% url 'mytasks' %}" class="btn btn-default"">Back</a>
+</div>
+{% endblock %}

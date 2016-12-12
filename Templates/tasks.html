@@ -7,6 +7,9 @@
 {% block content %}
 <div class="container">
     <div class="list-task" id="list_tasks">
+
+        <div id="has_token_flag" class="hidden">{% if has_token %}1{% else %}0{% endif %}</div>
+
         <div id="import_btn" class="container-fluid">
             <div class="row">
                 <div class="col-xs-offset-9 col-xs-3">
@@ -49,10 +52,10 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right">
-                                <li onclick="dismissTask({{ t.id }})"><a href="#">Admin</a></li>
-                                <li onclick="dismissTask({{ t.id }})"><a href="#">Travel</a></li>
-                                <li onclick="dismissTask({{ t.id }})"><a href="#">Marketing Event</a></li>
-                                <li onclick="dismissTask({{ t.id }})"><a href="#">Training</a></li>
+                                <li onclick="recordTask({{ t.id }})"><a href="#">Admin</a></li>
+                                <li onclick="recordTask({{ t.id }})"><a href="#">Travel</a></li>
+                                <li onclick="recordTask({{ t.id }})"><a href="#">Marketing Event</a></li>
+                                <li onclick="recordTask({{ t.id }})"><a href="#">Training</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li onclick="dismissTask({{ t.id }})"><a><span class="glyphicon glyphicon-remove-circle"></span>&nbsp;&nbsp;Dismiss</a></li>
                             </ul>
@@ -71,6 +74,9 @@
 
 {% block page_js %}
     <script type="text/javascript">
+    var has_token_flag = document.getElementById('has_token_flag');
+    var xhttp = new XMLHttpRequest();
+
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -88,17 +94,26 @@
     }
     var csrftoken = getCookie('csrftoken');
 
+    function recordTask(id) {
+        if (has_token_flag.innerHTML == '1') {
+
+            dismissTask(id);
+
+        } else {
+            url = "/sfdc/oauth/init/";
+            window.location = url;
+        }
+    }
 
     function dismissTask(id) {
-        var xhttp = new XMLHttpRequest();
         url = "/task/" + id + "/";
+        xhttp.open("DELETE", url, true);
+        xhttp.setRequestHeader('X-CSRFToken', csrftoken);
+        xhttp.send();
         xhttp.onreadystatechange = function() {
             var element = document.getElementById('row_' + id);
             element.parentNode.removeChild(element);
         }
-        xhttp.open("POST", url, true);
-        xhttp.setRequestHeader('X-CSRFToken', csrftoken);
-        xhttp.send();
 
     }
 
@@ -107,24 +122,11 @@
         if (document.getElementById('desc_' + id).className != 'hidden') {
             buttonsDisplay = 'col-xs-3';
 
-
             document.getElementById('desc_' + id).className = 'hidden';
-
 
         } else {
             document.getElementById('desc_' + id).className = 'x';
         }
-
-
-        //re = /actions_\d+/i;
-        //var table = document.getElementById('task_tbl');
-        //for (var i = 0, row; row = table.rows[i]; i++) {
-        //    for (var j = 0, col; col = row.cells[j]; j++) {
-        //        if ( col.id.match(re) ) {
-        //            //col.className = buttonsDisplay;
-        //        }
-        //    }
-        //}
     }
 
     </script>

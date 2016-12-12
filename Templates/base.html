@@ -54,14 +54,10 @@
             {% if 'user_id' not in request.session %}
               <li><a href="{% url 'home' %}">Login</a></li>
             {% else %}
+              <li><a href="{% url 'addtask' %}">New Activity</a></li>
+              <li><a href="{% url 'preferences' %}">Set Time_Zone</a></li>
               <li><a href="{% url 'logout' %}">Logout</a></li>
             {% endif %}
-          </ul>
-          <ul class="nav navbar-nav">
-            <li><a href="{% url 'addtask' %}">New Activity</a></li>
-          </ul>
-          <ul class="nav navbar-nav">
-            <li><a href="{% url 'forcecom_oauth_auth' %}">SFDC OAuth</a></li>
           </ul>
         </div>
       </div>

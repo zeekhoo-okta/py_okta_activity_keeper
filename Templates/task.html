@@ -22,31 +22,36 @@
             </div>
             {% endfor %}
 
+            <div class="form-group">
+                <div class="hidden">
+                    <input type="text" id="opportunity_id" name="opportunity_id" placeholder="opportunity_id">
+                </div>
+            </div>
 
             <div class="form-group form-group-sm">
                 <label class="col-sm-1 control-label">Opportunity:  </label>
                 <div class="col-sm-4" id="selectedOp">
                 </div>
+                <div class="col-sm-4" id="selectedOpId">
+                </div>
             </div>
-            {% if token %}
             <div class="form-group form-group-sm">
                 <div class="col-sm-4">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchOp" placeholder="Search">
+                        <input type="text" class="form-control" id="searchOp" name="searchString" placeholder="Search">
                         <div class="input-group-btn">
-                            <button class="btn btn-default btn-sm" type="button" onclick="getRecent()">
+                            <button class="btn btn-default btn-sm" type="button" onclick="searchOpptys()">
                                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
         </form>
 
     </div>
 
-    <table class = "table table-hover">
+    <table id="search_table" class = "table table-hover">
         <thead id="tab_head">
         </thead>
         <tbody id="search_results">
@@ -61,60 +66,54 @@
     {{ form.media }}
 
     <script type="text/javascript">
-    var tblHead = ["Opportunity","Stage","Close Date","Rep","Amount"];
+    var searchOp = document.getElementById('searchOp');
 
-    var tblValues = [
-       "Vacasa (+1300 - FTE/Contractors) IT Products,2 - Discovery,12/9/2016,Schantell Tamara,25000.00",
-       "Tableau Software - Platform,3 - Scope,12/30/2016,Bavinger Will,500000.00",
-       "In-House Realty LLC-Platform-90 users to start,6 - Validate Solution,10/15/2016,Sloan Tison,15000.00",
-       "Weidner Apartment Homes-SSO UD 1400,2 - Discovery,11/30/2016,Bavinger Will,50000.00",
-       "CyberCoders-400 MFA,4 - Go / No-Go,10/31/2016,Bourne Kevin,10000.00",
-       "Shiftgig-2000SSO UD Prov,2 - Discovery,10/31/2016,Tison Sloan,7200.00"
-    ];
-
-    function getRecent() {
+    function searchOpptys() {
         var xhttp = new XMLHttpRequest();
-        url = "/sfdc/recent/";
-        xhttp.onreadystatechange = function() {
-            var recents = JSON.parse(xhttp.responseText);
-            console.log(recents)
-            drawTable(recents);
+
+        url = "/sfdc/search/";
+        q = searchOp.value;
+        if (q.length >= 3) {
+            url += '?q=' + q;
         }
-        xhttp.open("GET", url, false);
+
+        xhttp.open("GET", url);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.setRequestHeader('Content-Type', 'application/json');
         xhttp.send();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.status == 401) {
+                window.location.href = '/sfdc/oauth/init';
+            }
+            recents = JSON.parse(xhttp.responseText);
+            opportunities = recents.opportunities;
+            drawTable(opportunities);
+        }
+
     }
 
     function drawTable(tableData) {
         var i;
         var draw = "";
         for(i = 0; i < tableData.length; i++) {
-            draw += '<tr><td>' +
-            'ABC' +
-            '</td></tr>';
+            draw += '<tr>' +
+            '<td style="display:none">' + tableData[i].Id + '</td>' +
+            '<td style="display:none">' + tableData[i].Name + '</td>' +
+            '<td>' + tableData[i].Name +
+            '<br><p style="font-size:11px">' +
+            'Owner:&nbsp;' + tableData[i].Owner + '&nbsp;&nbsp;Amount:&nbsp;' + tableData[i].Amount +
+            '</p>' +
+            '</td>' +
+            '<td style="font-size:11px">' + tableData[i].Stage + '<br>' + 'Close:&nbsp;' + tableData[i].CloseDate + '</td>' +
+            '</tr>';
         }
         document.getElementById('search_results').innerHTML = draw;
         document.getElementById('selectedOp').innerHTML = '';
+        document.getElementById('selectedOpId').innerHTML = '';
     }
 
 
-
-    function searchSfdc() {
-        var draw = '';
-        var arr = [];
-
-        var head = '<tr><td>' + tblHead.join('</td><td>') + '</td></tr>';
-        document.getElementById('tab_head').innerHTML = head;
-
-        for (var i=0; i < tblValues.length; i++) {
-          arr = tblValues[i].split(',');
-          draw += '<tr><td>' + arr.join('</td><td>') + '</td></tr>';
-        }
-        document.getElementById('search_results').innerHTML = draw;
-        document.getElementById('selectedOp').innerHTML = '';
-    }
-
-    var table = document.getElementsByTagName("table")[0];
-    var tbody = table.getElementsByTagName("tbody")[0];
+    var tbody = document.getElementById("search_results");
     tbody.onclick = function (e) {
         e = e || window.event;
         var target = e.srcElement || e.target;
@@ -123,10 +122,13 @@
         }
         if (target) {
             var cells = target.getElementsByTagName("td");
-            op = cells[0].innerHTML;
+            var op = cells[1].innerHTML;
+            var opId = cells[0].innerHTML;
         }
 
         document.getElementById('selectedOp').innerHTML = '<p class="form-control-static">' + op + '</p>';
+        document.getElementById('selectedOpId').innerHTML = '<p class="form-control-static">' + opId + '</p>';
+        document.getElementById('opportunity_id').value = opId;
 
         document.getElementById('search_results').innerHTML = '';
         document.getElementById('tab_head').innerHTML = '';

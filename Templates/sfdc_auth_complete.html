@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Salesforce Auth{% endblock %}
+{% block head %}
+Salesforce Auth
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Authenticated. Press OK to continue</h3>
+    <a href="{% url 'mytasks' %}" class="btn btn-primary">OK</a>
+</div>
+{% endblock %}

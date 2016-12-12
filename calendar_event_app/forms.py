@@ -1,45 +1,60 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
-from bootstrap3_datepicker.fields import DatePickerField
 from bootstrap3_datepicker.widgets import DatePickerInput
 
 TYPE_CHOICES = (
     ('None', '---'),
-    ('0', 'Other'),
-    ('1', 'Meeting Prep'),
-    ('2', 'POC Prep'),
-    ('3', 'Rfx'),
-    ('4', 'POC'),
-    ('5', 'White Boarding'),
-    ('6', 'Demo/Presentation'),
-    ('7', 'Discovery'),
-    ('8', 'Followup'),
-    ('9', 'Admin'),
-    ('10', 'Travel'),
-    ('11', 'BVA'),
-    ('12', 'Develop Architecture'),
-    ('13', 'Marketing Event'),
-    ('14', 'Training'),
+    ('Other', 'Other'),
+    ('Meeting Prep', 'Meeting Prep'),
+    ('POC Prep', 'POC Prep'),
+    ('Rfx', 'Rfx'),
+    ('POC', 'POC'),
+    ('White Boarding', 'White Boarding'),
+    ('Demo/Presentation', 'Demo/Presentation'),
+    ('Discovery', 'Discovery'),
+    ('Followup', 'Followup'),
+    ('Admin', 'Admin'),
+    ('Travel', 'Travel'),
+    ('BVA', 'BVA'),
+    ('Develop Architecture', 'Develop Architecture'),
+    ('Marketing Event', 'Marketing Event'),
+    ('Training', 'Training'),
 )
 
 
 class AddTaskForm(forms.Form):
-    ActivityDate = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
-                                                          attrs={"placeholder": "Due Date", "class": 'form-control input-sm'}))
+    activity_date = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
+                                                           attrs={"placeholder": "Due Date", "class": 'form-control input-sm'}))
 
-    Subject = forms.CharField(max_length=500, required=True,
+    subject = forms.CharField(max_length=500, required=True,
                               widget=forms.TextInput(attrs={'placeholder': 'Subject',
                                                             'class': 'form-control input-sm'})
                               )
 
-    TaskType = forms.ChoiceField(choices=TYPE_CHOICES, required=True,
-                                 widget=forms.Select(attrs={'class': 'form-control input-sm', 'placeholder': ''}))
+    task_type = forms.ChoiceField(choices=TYPE_CHOICES, required=True,
+                                  widget=forms.Select(attrs={'class': 'form-control input-sm', 'placeholder': ''}))
 
-    TimeSpent = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder': 'Time (minutes)',
+    time_spent = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder': 'Time (minutes)',
                                                                    'class': 'form-control input-sm'})
-                                   )
+                                    )
+
+    opportunity_id = forms.CharField(max_length=30, required=True, widget=forms.HiddenInput)
+
+    def clean_task_type(self):
+        if self.cleaned_data['task_type'] == 'None':
+            print('please select a task type')
+            raise forms.ValidationError(_("Please select a Task Type"), code='err1')
+        return self.cleaned_data['task_type']
+
+    def clean_time_spent(self):
+        if self.cleaned_data['time_spent'] <= 0:
+            raise forms.ValidationError(_("Provide a value for time spent"), code='err2')
+        return self.cleaned_data['time_spent']
 
 
 class ImportTaskForm(forms.Form):
     ImportRange = forms.CharField(max_length=30)
+
+
+class PreferenceForm(forms.Form):
+    time_zone = forms.CharField(max_length=50)
