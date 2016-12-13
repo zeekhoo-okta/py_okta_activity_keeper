@@ -1,7 +1,7 @@
 import requests
-import six
 from django.conf import settings
 from ...api.errors import Unauthorized, APIError
+from ...api.utils import dict_to_query_params
 
 
 class CronofyClient(object):
@@ -35,15 +35,7 @@ class CronofyClient(object):
         return response.json()
 
     def get_events(self, params):
-        params_str = self.__dict_to_query_params(params)
+        params_str = dict_to_query_params(params)
         response = requests.get(self.base_url + '/events' + params_str, headers=self.headers)
         return response.json()
 
-    @staticmethod
-    def __dict_to_query_params(d):
-        if d is None or len(d) == 0:
-            return ''
-
-        param_list = [param + '=' + (str(value).lower() if type(value) == bool else str(value))
-                      for param, value in six.iteritems(d) if value is not None]
-        return '?' + "&".join(param_list)
