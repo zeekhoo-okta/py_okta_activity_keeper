@@ -7,6 +7,7 @@ from_zone = tz.gettz(settings.TIME_ZONE)
 
 class Task(models.Model):
     to_zone = tz.gettz('America/Los_Angeles')
+
     okta_user_id = models.CharField(db_index=True, max_length=100)
     calendar_id = models.CharField(max_length=100)
     event_uid = models.CharField(max_length=100, db_index=True, unique=True)
@@ -15,6 +16,8 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     summary = models.CharField(max_length=255)
     subject = models.CharField(max_length=255, blank=True)
+    organizer = models.CharField(max_length=100, blank=True)
+    attendees = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=100, blank=True)
     due_date = models.DateField(null=True, blank=True)
     time_spent = models.IntegerField(null=True, blank=True)
@@ -22,6 +25,9 @@ class Task(models.Model):
 
     class Meta:
         db_table = "task"
+        index_together = [
+            ["okta_user_id", "status_code"],
+        ]
 
     def set_tz(self, zone):
         self.to_zone = tz.gettz(zone)
@@ -37,8 +43,10 @@ class Task(models.Model):
         return local.time().strftime('%I:%M %p')
 
     def desc(self):
-        newstring = self.description.replace("\r\n", '<br/>')
-        arr = newstring.split('<br/>')
+        desc = 'Organizer: ' + self.organizer + '<br/>'\
+               + 'Attendees: ' + self.attendees + '<br/><br/>'\
+               + self.description.replace("\r\n", '<br/>')
+        arr = desc.split('<br/>')
         return arr
 
     def start_date_local(self):

@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import date
+from datetime import date, datetime
 
 from api.clients.CronofyClient import CronofyClient
 from api.clients.ForcedotcomClient import ForcedotcomClient
@@ -45,7 +45,6 @@ def login_session(request):
         # Set the okta session
         user_id = user['id']
         profile = user['profile']
-        print('profile = {}'.format(profile))
         if profile['firstName'] and profile['lastName']:
             name = profile['firstName'] + ' ' + profile['lastName']
         else:
@@ -324,19 +323,28 @@ def _populate_tasks(request):
         }
         result = client.get_events(params)
         events = result['events']
+
         for event in events:
-            task = Task.objects.filter(event_uid=event['event_uid'])
-            if not task:
-                new = Task(event_uid=event['event_uid'],
-                           summary=event['summary'],
-                           calendar_id=calendar_id,
-                           okta_user_id=user_id,
-                           start=event['start'],
-                           end=event['end'],
-                           description=event['description'],
-                           status_code='N'
-                           )
-                new.save()
+            if not len(event['start']) == 10:
+                task = Task.objects.filter(event_uid=event['event_uid'])
+                if not task:
+                    attendee_list = ''
+                    attendees = event['attendees']
+                    for attendee in attendees:
+                        if len(attendee_list) < 255 - len(attendee['display_name']) - 2:
+                            attendee_list = attendee_list + attendee['display_name'] + ', '
+                    new = Task(event_uid=event['event_uid'],
+                               summary=event['summary'],
+                               calendar_id=calendar_id,
+                               okta_user_id=user_id,
+                               start=event['start'],
+                               end=event['end'],
+                               description=event['description'][0:254],
+                               organizer=event['organizer']['display_name'][0:99],
+                               attendees=attendee_list[0:254],
+                               status_code='N'
+                               )
+                    new.save()
     except Exception as e:
         print("There was an exception: {}".format(e))
 
