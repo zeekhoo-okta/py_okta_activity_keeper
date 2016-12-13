@@ -27,19 +27,13 @@ DEBUG = False
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com']
 
 # Application definition
-
 APP_URL = os.environ.get('APP_URL')
-
 OKTA_ORG = os.environ.get('OKTA_ORG')
-# OKTA_API_TOKEN = os.environ.get('OKTA_API_TOKEN')
 
 SFDC_URL = os.environ.get('SFDC_URL')
 SFDC_API_VERSION = 'v38.0'
 SFDC_CLIENT_ID = os.environ.get('SFDC_CLIENT_ID')
 SFDC_SECRET = os.environ.get('SFDC_SECRET')
-# SFDC_USERNAME = os.environ.get('SFDC_USERNAME')
-# SFDC_PASSWORD = os.environ.get('SFDC_PASSWORD')
-# SFDC_TOKEN = os.environ.get('SFDC_SECURITY_TOKEN')
 
 CRONOFY_API_URL = 'https://api.cronofy.com/v1'
 CRONOFY_AUTH_URL = 'https://app.cronofy.com/oauth'
