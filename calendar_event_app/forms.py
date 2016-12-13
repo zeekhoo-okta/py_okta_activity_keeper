@@ -1,6 +1,6 @@
 from django import forms
-from django.utils.translation import ugettext_lazy as _
 from bootstrap3_datepicker.widgets import DatePickerInput
+from datetimewidget.widgets import DateTimeWidget
 
 TYPE_CHOICES = (
     ('None', '---'),
@@ -24,7 +24,13 @@ TYPE_CHOICES = (
 
 class AddTaskForm(forms.Form):
     activity_date = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
-                                                           attrs={"placeholder": "Due Date", "class": 'form-control input-sm'}))
+                                                           attrs={"placeholder": "Due Date",
+                                                                  "class": 'form-control input-sm'})
+                                    )
+    # activity_date = forms.DateField(widget=DateTimeWidget(attrs={'id': "yourdatetimeid"},
+    #                                                       usel10n=True,
+    #                                                       options={'format': 'mm/dd/yyyy'},
+    #                                                       bootstrap_version=3))
 
     subject = forms.CharField(max_length=500, required=True,
                               widget=forms.TextInput(attrs={'placeholder': 'Subject',
@@ -32,7 +38,9 @@ class AddTaskForm(forms.Form):
                               )
 
     task_type = forms.ChoiceField(choices=TYPE_CHOICES, required=True,
-                                  widget=forms.Select(attrs={'class': 'form-control input-sm', 'placeholder': ''}))
+                                  widget=forms.Select(attrs={'class': 'form-control input-sm',
+                                                             'placeholder': ''})
+                                  )
 
     time_spent = forms.IntegerField(widget=forms.NumberInput(attrs={'placeholder': 'Time (minutes)',
                                                                    'class': 'form-control input-sm'})
@@ -42,7 +50,6 @@ class AddTaskForm(forms.Form):
 
     def clean_task_type(self):
         if self.cleaned_data['task_type'] == 'None':
-            print('please select a task type')
             raise forms.ValidationError(_("Please select a Task Type"), code='err1')
         return self.cleaned_data['task_type']
 

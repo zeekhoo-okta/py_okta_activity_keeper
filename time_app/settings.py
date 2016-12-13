@@ -21,12 +21,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com']
 
 # Application definition
+
 APP_URL = os.environ.get('APP_URL')
 OKTA_ORG = os.environ.get('OKTA_ORG')
 
@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_forms_bootstrap',
     'bootstrap3_datepicker',
-    'rest_framework'
+    'rest_framework',
+    'datetimewidget'
 ]
 
 MIDDLEWARE = [

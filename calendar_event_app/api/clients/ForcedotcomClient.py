@@ -1,5 +1,4 @@
 import requests
-import six
 from django.conf import settings
 from ...api.errors import Unauthorized, APIError
 import json
@@ -89,7 +88,7 @@ class ForcedotcomClient(object):
                                 amount = 0
                             opportunity['Amount'] = "{:,.0f}".format(amount)
                         if column['fieldNameOrPath'] == 'CloseDate':
-                            # Fri Sep 23 21:19:32 GMT 2016
+                            # e.g. Fri Sep 23 21:19:32 GMT 2016
                             str = column['value']
                             date_str = str[4:][:6] + ' ' + str[-4:]
                             opportunity['CloseDate'] = date_str
@@ -99,15 +98,6 @@ class ForcedotcomClient(object):
                             opportunity['Owner'] = column['value']
                     recent_opportunities.append(opportunity)
         return recent_opportunities
-
-    @staticmethod
-    def __dict_to_query_params(d):
-        if d is None or len(d) == 0:
-            return ''
-
-        param_list = [param + '=' + (str(value).lower() if type(value) == bool else str(value))
-                      for param, value in six.iteritems(d) if value is not None]
-        return '?' + "&".join(param_list)
 
     def post_task(self, op, subject, activity_date, time_spent, task_type):
         task = {

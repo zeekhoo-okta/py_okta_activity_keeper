@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import date, datetime
+from datetime import date
 
 from api.clients.CronofyClient import CronofyClient
 from api.clients.ForcedotcomClient import ForcedotcomClient
