@@ -21,6 +21,9 @@ from calendar_event_app.views import import_options_view, import_tasks, cronofy_
 from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
 from calendar_event_app.views import forcecom_auth_init, forcecom_auth_complete, forcecom_oauth_auth
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+
 urlpatterns = [
     # django admin
     url(r'^admin/', admin.site.urls),
@@ -51,3 +54,5 @@ urlpatterns = [
     url(r'^sfdc/oauth/auth/[0-9]*$', forcecom_oauth_auth, name='forcecom_oauth_auth'),
     url(r'^sfdc/search/$', forcecom_search, name='forcecom_search'),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
