@@ -14,9 +14,6 @@
         <form class="form-horizontal" name="TaskForm" action="{% url 'task' id %}" method="post" role="form">
             {% csrf_token %}
 
-            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-            <hr/>
-
             {% for field in form.visible_fields %}
             <div class="form-group {% if field.errors %} has-error {% endif %}">
                 <div class="col-sm-5">
@@ -53,16 +50,20 @@
                     </div>
                 </div>
             </div>
+
+            <table id="search_table" class = "table table-hover">
+                <thead id="tab_head">
+                </thead>
+                <tbody id="search_results">
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            <hr/>
+
         </form>
 
     </div>
-
-    <table id="search_table" class = "table table-hover">
-        <thead id="tab_head">
-        </thead>
-        <tbody id="search_results">
-        </tbody>
-    </table>
 </div>
 {% endblock content %}
 
