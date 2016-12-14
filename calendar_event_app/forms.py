@@ -45,12 +45,12 @@ class AddTaskForm(forms.Form):
 
     def clean_task_type(self):
         if self.cleaned_data['task_type'] == 'None':
-            raise forms.ValidationError(_("Please select a Task Type"), code='err1')
+            raise forms.ValidationError("Please select a Task Type", code='err1')
         return self.cleaned_data['task_type']
 
     def clean_time_spent(self):
         if self.cleaned_data['time_spent'] <= 0:
-            raise forms.ValidationError(_("Provide a value for time spent"), code='err2')
+            raise forms.ValidationError("Provide a value for time spent", code='err2')
         return self.cleaned_data['time_spent']
 
 
