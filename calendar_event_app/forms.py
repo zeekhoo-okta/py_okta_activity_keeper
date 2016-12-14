@@ -1,6 +1,5 @@
 from django import forms
 from bootstrap3_datepicker.widgets import DatePickerInput
-from datetimewidget.widgets import DateTimeWidget
 
 TYPE_CHOICES = (
     ('None', '---'),
@@ -27,10 +26,6 @@ class AddTaskForm(forms.Form):
                                                            attrs={"placeholder": "Due Date",
                                                                   "class": 'form-control input-sm'})
                                     )
-    # activity_date = forms.DateField(widget=DateTimeWidget(attrs={'id': "yourdatetimeid"},
-    #                                                       usel10n=True,
-    #                                                       options={'format': 'mm/dd/yyyy'},
-    #                                                       bootstrap_version=3))
 
     subject = forms.CharField(max_length=500, required=True,
                               widget=forms.TextInput(attrs={'placeholder': 'Subject',

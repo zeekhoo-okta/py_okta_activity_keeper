@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'django_forms_bootstrap',
     'bootstrap3_datepicker',
     'rest_framework',
-    'datetimewidget'
 ]
 
 MIDDLEWARE = [
