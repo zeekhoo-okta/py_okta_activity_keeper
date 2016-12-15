@@ -56,7 +56,6 @@ class ForcedotcomClient(object):
         response = requests.get(self.base_url + '/services/data/' + self.version + '/sobjects/Opportunity/listviews',
                                 headers=self.headers)
         status = int(float(response.status_code))
-        print(status)
         if status >= 400:
             if status == 401:
                 raise Unauthorized()
@@ -105,8 +104,8 @@ class ForcedotcomClient(object):
             'Subject': subject,
             'Status': 'Completed',
             'ActivityDate': activity_date,
-            'Time_Spent_minutes__c': time_spent
-            # "Type__c": task_type
+            'Time_Spent_minutes__c': time_spent,
+            'Type': task_type
         }
         json_task = json.dumps(task)
         resource = self.base_url + '/services/data/' + self.version + '/sobjects/Task'

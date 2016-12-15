@@ -1,6 +1,7 @@
 venv
 .idea
 .env
+.eb_setenv
 .DS_Store
 *.pyc
 __pycache__
