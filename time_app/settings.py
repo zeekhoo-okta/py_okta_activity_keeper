@@ -23,7 +23,7 @@ SECRET_KEY = '***REMOVED***'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com', 'alwaysaasure.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com', 'alwaysaasure.com', 'www.alwaysaasure.com']
 
 # Application definition
 
