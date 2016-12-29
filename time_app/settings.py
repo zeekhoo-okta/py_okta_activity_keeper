@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '***REMOVED***'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = os.environ.get('DEBUG')
 
@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_forms_bootstrap',
     'bootstrap3_datepicker',
-    'rest_framework',
+    # 'rest_framework',
 ]
 
 MIDDLEWARE = [

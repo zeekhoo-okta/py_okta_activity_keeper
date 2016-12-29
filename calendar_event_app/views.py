@@ -117,6 +117,54 @@ def preferences(request):
     return render(request, 'preferences.html', {'form': preference})
 
 
+def task_action(request, p):
+    response = HttpResponse()
+
+    if request.method == 'POST':
+        token = _forcecom_session_check(request)
+        if not token:
+            response.status_code = 401
+            return response
+
+        task = Task.objects.get(pk=p)
+        if not task:
+            response.status_code = 400
+            return response
+
+        j = json.loads(request.body)
+        action = j['action']
+        print('action {0} {1}'.format(p, action))
+
+        if not action:
+            response.status_code = 400
+            return response
+
+        try:
+            client = ForcedotcomClient(token)
+            activity_date = task.start.strftime('%Y-%m-%-d')
+
+            result = client.post_task(
+                None,
+                task.summary,
+                activity_date,
+                (task.end - task.start).total_seconds() / 60,
+                action
+            )
+            status = result['status_code']
+            if status >= 200:
+                if status < 300:
+                    task.status_code = 'C'
+                    task.save()
+
+        except Exception as e:
+            print('There was an error: {0}: {1}'.format(e.status_code, e.message))
+            if e.status_code == 401:
+                response.status_code = 401
+                return response
+
+    return response
+
+
 def task_view(request, p):
     task = None
     if p != 'new':

@@ -11,15 +11,17 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <!-- CSS -->
     {% bootstrap_css %}
-
     <!-- Custom CSS -->
     <link href="{% static 'css/zaasure.css' %}" rel="stylesheet">
 
+    <!-- JavaScript -->
+    {% bootstrap_javascript jquery=1 %}
+    <script src="{% static 'js/zaasure.min.js' %}" type="text/javascript"></script>
 
     {% block head_js %}
     {% endblock head_js %}
@@ -71,9 +73,6 @@
       {% block content %}
       {% endblock content %}
     </div>
-
-    <!-- JavaScript -->
-    {% bootstrap_javascript jquery=1 %}
 
     {% block page_js %}{% endblock page_js %}
 

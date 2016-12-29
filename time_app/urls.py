@@ -20,6 +20,7 @@ from calendar_event_app.views import home_view, login_session, logout, task_view
 from calendar_event_app.views import import_options_view, import_tasks, cronofy_oauth_callback, cronofy_access_token
 from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
 from calendar_event_app.views import forcecom_auth_init, forcecom_auth_complete, forcecom_oauth_auth
+from calendar_event_app.views import task_action
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
@@ -38,7 +39,7 @@ urlpatterns = [
     url(r'^task/([a-zA-Z0-9]+)/$', task_view, name='task'),
     url(r'^task/new/$', task_view, name='addtask'),
     url(r'^task/$', my_tasks_view, name='mytasks'),
-
+    url(r'^taskaction/([a-zA-Z0-9]+)/$', task_action, name='action'),
 
     # cronofy
     url(r'^import_options/$', import_options_view, name='import_options'),

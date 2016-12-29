@@ -2,6 +2,7 @@ import requests
 from django.conf import settings
 from ...api.errors import Unauthorized, APIError
 import json
+import urllib
 
 
 class ForcedotcomClient(object):
@@ -9,6 +10,7 @@ class ForcedotcomClient(object):
         self.base_url = settings.SFDC_URL
         self.version = settings.SFDC_API_VERSION
         self.token = token
+        self.pre_sales_tasks_id = None
 
         if not self.base_url:
             raise ValueError('Invalid base_url')
@@ -26,6 +28,25 @@ class ForcedotcomClient(object):
         response = requests.get(self.base_url + '/services/data/' + self.version + '/recent/?limit=0',
                                 headers=self.headers)
         return response.status_code == 200
+
+    def _record_type_id(self, record_type):
+        if self.pre_sales_tasks_id:
+            return self.pre_sales_tasks_id
+
+        encoded = urllib.quote_plus(record_type)
+        q = 'SELECT+id+from+RecordType+WHERE+name%3D%27' + encoded + '%27'
+
+        try:
+            result = requests.get(self.base_url + '/services/data/' + self.version + '/query/?q=' + q,
+                                  headers=self.headers)
+            records = result.json()['records']
+            for r in records:
+                self.pre_sales_tasks_id = r['Id']
+                return self.pre_sales_tasks_id
+        except Exception as e:
+            return None
+
+        return None
 
     def search_opportunities(self, q):
         response = requests.get(self.base_url + '/services/data/' + self.version + '/parameterizedSearch/?q=' + q +
@@ -99,14 +120,30 @@ class ForcedotcomClient(object):
         return recent_opportunities
 
     def post_task(self, op, subject, activity_date, time_spent, task_type):
-        task = {
-            'WhatId': op,
-            'Subject': subject,
-            'Status': 'Completed',
-            'ActivityDate': activity_date,
-            'Time_Spent_minutes__c': time_spent,
-            'Type': task_type
-        }
+        rt_id = self._record_type_id('Pre-Sales Tasks')
+        if not rt_id:
+            raise APIError(message='Pre-Sales Tasks Id not found', status_code=400)
+
+        if not op:
+            task = {
+                'Subject': subject,
+                'Status': 'Completed',
+                'ActivityDate': activity_date,
+                'Time_Spent_minutes__c': time_spent,
+                'Type': task_type,
+                'RecordTypeId': rt_id
+            }
+        else:
+            task = {
+                'WhatId': op,
+                'Subject': subject,
+                'Status': 'Completed',
+                'ActivityDate': activity_date,
+                'Time_Spent_minutes__c': time_spent,
+                'Type': task_type,
+                'RecordTypeId': rt_id
+            }
+
         json_task = json.dumps(task)
         resource = self.base_url + '/services/data/' + self.version + '/sobjects/Task'
         response = requests.post(resource, headers=self.headers, data=json_task)
