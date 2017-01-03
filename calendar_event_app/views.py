@@ -59,9 +59,11 @@ def login_session(request):
         try:
             preference = get_object_or_404(UserPreference, okta_user_id=user_id)
             preference.name = name
-            preference.time_zone = time_zone
+            if not preference.time_zone or preference.time_zone == '':
+                preference.time_zone = time_zone
             preference.save()
         except Exception as e:
+            print(e)
             preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
             preference.save()
 
@@ -146,15 +148,20 @@ def preferences(request):
             if preference:
                 form = PreferenceForm(request.POST)
                 if form.is_valid():
-                    preference.time_zone = form.cleaned_data['time_zone']
+                    time_zone = form.cleaned_data['time_zone']
+                    preference.time_zone = time_zone
                     preference.save()
 
                     # Save preferences into session
                     request.session['time_zone'] = preference.time_zone
 
+                    # Save time zone preferece onto user profile
+
             return HttpResponseRedirect(reverse('mytasks'))
     except NoSession as e:
         return HttpResponseRedirect(reverse_lazy('home'))
+    except Exception as e:
+        print(e)
 
     return render(request, 'preferences.html', {'form': preference})
 
