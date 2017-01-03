@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="reg_page">
+    <div id="register">
+        <form class="form-horizontal" name="RegistrationForm" action="{% url 'register' %}" method="post">
+          {% csrf_token %}
+          <div class="form-group {% if form.firstName.errors %} has-error {% endif %}">
+              <p>{{ form.firstName.errors }}</p>
+            <div class="col-sm-4">
+              <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name">
+            </div>
+          </div>
+          <div class="form-group {% if form.lastName.errors %} has-error {% endif %}">
+              <p>{{ form.lastName.errors }}</p>
+            <div class="col-sm-4">
+              <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name">
+            </div>
+          </div>
+          <div class="form-group {% if form.email.errors %} has-error {% endif %}">
+              <p>{{ form.email.errors }}</p>
+            <div class="col-sm-4">
+              <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+            </div>
+          </div>
+          <div class="form-group">
+            {% if form.errors %}
+            <p>{{ form.non_field_errors }}</p>
+            {% endif %}
+            <div class="col-sm-offset-0 col-sm-4">
+              <button type="submit" value="Register" class="btn btn-block btn-primary">Register</button>
+            </div>
+          </div>
+        </form>
+    </div>
+    Already registered? <a href="{% url 'login' %}">Click here to login</a>
+  </div>
+</div>
+{% endblock %}

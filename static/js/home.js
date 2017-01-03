@@ -8,10 +8,16 @@ var oktaSignIn = new OktaSignIn({
         smsRecovery: true,
         multiOptionalFactorEnroll: true
     },
+    helpLinks: {
+        'custom': [{
+            'text': 'No Account? Click here to Register',
+            'href': '/register'
+        }]
+    },
     labels: {
         'primaryauth.title': 'Please Sign-In',
         'help': 'Click here for more help'
-    }
+    },
 });
 
 oktaSignIn.session.exists(function (exists) {

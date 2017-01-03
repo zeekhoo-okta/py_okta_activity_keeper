@@ -3,15 +3,15 @@
     padding-bottom: 50px;
 }
 
+.reg_page {
+    position: relative;
+    padding-top: 20px;
+}
+
 .login-pg {
     background-image: url('https://s3-us-west-2.amazonaws.com/okta-activity-timekeeper/static/okta-mints.png');
     background-repeat: repeat;
     background-position: center center fixed;
-/*    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;*/
-
     position: relative;
     padding-top: 20px;
     padding-bottom: 50%;

@@ -1,5 +1,8 @@
 from django import forms
 from bootstrap3_datepicker.widgets import DatePickerInput
+from calendar_event_app.api.clients.UserClient import UserClient
+from django.conf import settings
+
 
 TYPE_CHOICES = (
     ('None', '---'),
@@ -60,3 +63,30 @@ class ImportTaskForm(forms.Form):
 
 class PreferenceForm(forms.Form):
     time_zone = forms.CharField(max_length=50)
+
+
+class RegistrationForm(forms.Form):
+    firstName = forms.CharField(max_length=100, required=True)
+    lastName = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(widget=forms.TextInput(attrs=dict(required=True, max_length=30)), label="email")
+
+    def clean_email(self):
+        """
+        email field validation to check if the username is already in Okta
+        """
+        email = self.cleaned_data['email']
+        parts = email.split("@")
+        if parts[1] != 'okta.com':
+            raise forms.ValidationError("You must register with an Okta email")
+
+        try:
+            client = UserClient(''.join(['https://', settings.OKTA_ORG]), settings.API_TOKEN)
+            result = client.filter_user(filter_string='profile.login eq "' + email + '"')
+            readCount = len(result)
+        except Exception as e:
+            return self.cleaned_data['email']
+
+        if readCount > 0:
+            raise forms.ValidationError("A user with this email already exists")
+
+        return self.cleaned_data['email']

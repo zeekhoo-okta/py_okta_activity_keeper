@@ -29,6 +29,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'activity-timekeeper-dev.us-
 
 APP_URL = os.environ.get('APP_URL')
 OKTA_ORG = os.environ.get('OKTA_ORG')
+API_TOKEN = os.environ.get('API_TOKEN')
 
 SFDC_URL = os.environ.get('SFDC_URL')
 SFDC_API_VERSION = 'v38.0'

@@ -4,7 +4,8 @@ var xhttp = new XMLHttpRequest();
 var csrftoken = getCookie('csrftoken');
 
 function recordTask(id, action) {
-    if (has_token_flag.innerHTML == '1') {
+    element = document.getElementById('has_token_flag');
+    if (element.innerHTML == '1') {
         xhttp.open("POST", "/taskaction/" + id + "/");
         xhttp.setRequestHeader('X-CSRFToken', csrftoken);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");

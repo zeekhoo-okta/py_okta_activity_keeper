@@ -1,3 +1,25 @@
+class NoSession(Exception):
+    def __init__(self, message=None):
+        msg = "No Session"
+        if message:
+            msg = msg + ": " + message
+        self.message = msg
+        self.status_code = 302
+
+    def __str__(self):
+        return self.message
+
+
+class NoSfdcSession(Exception):
+    def __init__(self, message=None):
+        msg = "No SFDC Session"
+        if message:
+            msg = msg + ": " + message
+        self.message = msg
+        self.status_code = 302
+
+    def __str__(self):
+        return self.message
 
 
 class APIError(Exception):

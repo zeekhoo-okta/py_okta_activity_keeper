@@ -35,9 +35,8 @@
 
   <body id="main_body">
 
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
-
         <div class="navbar-header">
           {% if 'user_id' not in request.session %}
             <a class="navbar-brand" href="{% url 'home' %}">Home</a>
@@ -50,20 +49,23 @@
             <span>Menu <b class = "caret"></b></span>
           </button>
         </div>
-
         <div class="navbar-collapse collapse" id="navbar-responsive-collapse">
           <ul class="nav navbar-nav">
+            {% if 'user_id' in request.session %}
+              <li><a href="{% url 'addtask' %}">New Activity</a></li>
+            {% endif %}
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
             {% if 'user_id' not in request.session %}
               <li><a href="{% url 'home' %}">Login</a></li>
             {% else %}
-              <li><a href="{% url 'addtask' %}">New Activity</a></li>
               <li><a href="{% url 'preferences' %}">Set Time_Zone</a></li>
               <li><a href="{% url 'logout' %}">Logout</a></li>
             {% endif %}
           </ul>
         </div>
       </div>
-    </div>
+    </nav>
 
     <div class="container">
     {% bootstrap_messages %}
