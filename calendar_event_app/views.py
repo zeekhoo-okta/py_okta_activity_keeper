@@ -90,7 +90,7 @@ def register(request):
             try:
                 client = UserClient(OKTA_ORG, settings.API_TOKEN)
                 response = client.create_user(email, firstName, lastName)
-                if response == 200:
+                if response['status_code'] == 200:
                     return HttpResponseRedirect(reverse('registration_success'))
             except Exception as e:
                 form.add_error(field=None, error=e)

@@ -35,7 +35,7 @@ class UserClient(object):
             }
         }
         json_user = json.dumps(user)
-        response = requests.post(self.base_url + '?activate=false', headers=self.headers, data=json_user)
+        response = requests.post(self.base_url + '?activate=true', headers=self.headers, data=json_user)
         status = int(float(response.status_code))
         if status >= 400:
             if status == 401:
