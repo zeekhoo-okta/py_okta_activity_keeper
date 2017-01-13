@@ -2,6 +2,7 @@ venv
 .idea
 .env*
 .eb_setenv
+.mysql
 .DS_Store
 __pycache__
 *.pyc

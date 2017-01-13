@@ -215,9 +215,10 @@ def task_action(request, p):
 
 
 def task_view(request, p):
+    task = None
+
     try:
-        token = _forcecom_session_check(request)
-        task = None
+        _nosession_check(request)
 
         if p != 'new':
             task = Task.objects.get(pk=p)
@@ -229,6 +230,11 @@ def task_view(request, p):
             response = HttpResponse()
             response.status_code = 204
             return response
+    except NoSession as e:
+        return HttpResponseRedirect(reverse_lazy('home'))
+
+    try:
+        token = _forcecom_session_check(request)
 
         if request.method == 'POST':
             form = AddTaskForm(request.POST)
