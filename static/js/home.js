@@ -1,6 +1,11 @@
 var csrftoken = getCookie('csrftoken');
 
-var baseUrl = 'https://zeekhoo.okta.com';
+function getBaseUrl() {
+    element = document.getElementById('okta-org');
+    return element.innerHTML;
+}
+
+var baseUrl = getBaseUrl();
 var oktaSignIn = new OktaSignIn({
     baseUrl: baseUrl,
     features: {
@@ -20,21 +25,20 @@ var oktaSignIn = new OktaSignIn({
     },
 });
 
-oktaSignIn.session.exists(function (exists) {
-    oktaSignIn.renderEl(
-        { el: '#okta-login-container' },
-        function (res) {
-            if (res.status === 'SUCCESS') {
-                $.ajaxSetup({
-                    headers: { "X-CSRFToken": getCookie("csrftoken") }
-                });
-                $.post("/login/", JSON.stringify(res.user), function(data) {
-                    window.location.href="/task/";
-                });
-            }
-        },
-        function (err) {
-            console.log('Unexpected error authenticating user: %o', err);
+oktaSignIn.renderEl(
+    { el: '#okta-login-container' },
+    function (res) {
+        console.log(res);
+        if (res.status === 'SUCCESS') {
+            $.ajaxSetup({
+                headers: { "X-CSRFToken": getCookie("csrftoken") }
+            });
+            $.post("/login/", JSON.stringify(res.user), function(data) {
+                window.location.href="/task/";
+            });
         }
-    );
-});
+    },
+    function (err) {
+        console.log('Unexpected error authenticating user: %o', err);
+    }
+);

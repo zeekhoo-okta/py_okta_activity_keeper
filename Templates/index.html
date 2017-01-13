@@ -14,6 +14,7 @@
 
 
 {% block content %}
+<div id="okta-org" class="hidden">{{ okta_org }}</div>
 <div class="login-pg">
 	{% csrf_token %}
 	<div id="okta-login-container"></div>

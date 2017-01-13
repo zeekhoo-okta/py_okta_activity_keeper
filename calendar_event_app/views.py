@@ -135,7 +135,8 @@ def home_view(request):
     try:
         _nosession_check(request)
     except NoSession as e:
-        return render(request, 'index.html')
+        c = {'okta_org': OKTA_ORG}
+        return render(request, 'index.html', c)
 
     return HttpResponseRedirect(reverse('mytasks'))
 
