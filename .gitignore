@@ -9,6 +9,6 @@ __pycache__
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
-ebextensions-save
+ebextensions-dev
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
