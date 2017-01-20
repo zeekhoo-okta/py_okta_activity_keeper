@@ -22,6 +22,7 @@ class Task(models.Model):
     due_date = models.DateField(null=True, blank=True)
     time_spent = models.IntegerField(null=True, blank=True)
     status_code = models.CharField(max_length=2)
+    opportunity = models.CharField(max_length=100, blank=True)
 
     class Meta:
         db_table = "task"

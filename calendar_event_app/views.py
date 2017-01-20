@@ -241,9 +241,10 @@ def task_view(request, p):
             if form.is_valid():
                 client = ForcedotcomClient(token)
                 activity_date = form.cleaned_data['activity_date'].strftime('%Y-%m-%-d')
+                opportunity_id = form.cleaned_data['opportunity_id']
 
                 result = client.post_task(
-                    form.cleaned_data['opportunity_id'],
+                    opportunity_id,
                     form.cleaned_data['subject'],
                     activity_date,
                     form.cleaned_data['time_spent'],
@@ -251,6 +252,7 @@ def task_view(request, p):
                 )
                 if task:
                     task.status_code = 'C'
+                    task.opportunity = opportunity_id
                     task.save()
 
                 return HttpResponseRedirect(reverse('mytasks'))
