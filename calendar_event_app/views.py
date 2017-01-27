@@ -251,8 +251,13 @@ def task_view(request, p):
                     form.cleaned_data['task_type']
                 )
                 if task:
+                    task.set_completed_time()
+
                     task.status_code = 'C'
                     task.opportunity = opportunity_id
+                    task.subject = form.cleaned_data['subject']
+                    task.time_spent = form.cleaned_data['time_spent']
+                    task.type = form.cleaned_data['task_type']
                     task.save()
 
                 return HttpResponseRedirect(reverse('mytasks'))
@@ -274,7 +279,7 @@ def task_view(request, p):
     except NoSfdcSession or Unauthorized as e:
         return HttpResponseRedirect(reverse('forcecom_auth_init'))
     except Exception as e:
-        print('There was an error: {0}: {1}'.format(e.status_code, e.message))
+        print('There was an error: {}'.format(e.message))
 
     return render(request, 'task.html', {'form': form, 'id': p})
 

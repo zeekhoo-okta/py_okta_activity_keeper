@@ -1,12 +1,14 @@
 from django.db import models
 from django.conf import settings
 from dateutil import tz
+from datetime import datetime
+import pytz
 
 from_zone = tz.gettz(settings.TIME_ZONE)
-
+ama_la = 'America/Los_Angeles'
 
 class Task(models.Model):
-    to_zone = tz.gettz('America/Los_Angeles')
+    to_zone = tz.gettz(ama_la)
 
     okta_user_id = models.CharField(db_index=True, max_length=100)
     calendar_id = models.CharField(max_length=100)
@@ -23,6 +25,7 @@ class Task(models.Model):
     time_spent = models.IntegerField(null=True, blank=True)
     status_code = models.CharField(max_length=2)
     opportunity = models.CharField(max_length=100, blank=True)
+    completed_time = models.CharField(max_length=19, blank=True)
 
     class Meta:
         db_table = "task"
@@ -54,6 +57,11 @@ class Task(models.Model):
         utc = self.start.replace(tzinfo=from_zone)
         local = utc.astimezone(self.to_zone)
         return local.date().strftime('%a %B %-d %Y')
+
+    def set_completed_time(self):
+        curr = datetime.now().strftime('%Y-%m-%d %I:%M %p')
+        # UTC current time
+        self.completed_time = curr
 
 
 class UserPreference(models.Model):
