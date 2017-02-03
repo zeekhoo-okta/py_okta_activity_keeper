@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import date
+from datetime import date, datetime
 
 from api.clients.CronofyClient import CronofyClient
 from api.clients.ForcedotcomClient import ForcedotcomClient
@@ -25,6 +25,8 @@ SESSION_COOKIES = ['userId',
                    'login',
                    'time_zone',
                    'event_range',
+                   'event_from_date',
+                   'event_to_date',
                    'cronofy_access_token',
                    'forcecom_access_token'
                    ]
@@ -43,7 +45,7 @@ def login_session(request):
     if request.method == 'POST':
         user = json.loads(request.body)
 
-        # Set the okta session
+        # Set the Okta session
         user_id = user['id']
         profile = user['profile']
         if profile['firstName'] and profile['lastName']:
@@ -53,7 +55,7 @@ def login_session(request):
         if profile['timeZone']:
             time_zone = profile['timeZone']
         else:
-            time_zone = None
+            time_zone = 'America/Los_Angeles'
 
         request.session['user_id'] = user_id
         try:
@@ -61,6 +63,8 @@ def login_session(request):
             preference.name = name
             if not preference.time_zone or preference.time_zone == '':
                 preference.time_zone = time_zone
+            else:
+                time_zone = preference.time_zone
             preference.save()
         except Exception as e:
             print(e)
@@ -71,10 +75,8 @@ def login_session(request):
             request.session['login'] = profile['login']
         else:
             request.session['login'] = None
-        if profile['timeZone']:
-            request.session['time_zone'] = profile['timeZone']
-        else:
-            request.session['time_zone'] = 'America/Los_Angeles'
+
+        request.session['time_zone'] = time_zone
 
     return HttpResponseRedirect(reverse_lazy('home'))
 
@@ -321,6 +323,16 @@ def import_options_view(request):
     return render(request, 'import_options.html', {'form': form})
 
 
+def import_options_range_view(request):
+    try:
+        _nosession_check(request)
+        form = ImportTaskForm()
+    except NoSession as e:
+        return HttpResponseRedirect(reverse_lazy('home'))
+
+    return render(request, 'import_options_range.html', {'form': form})
+
+
 def import_tasks(request):
     try:
         _nosession_check(request)
@@ -329,7 +341,14 @@ def import_tasks(request):
             form = ImportTaskForm(request.POST)
             if form.is_valid():
                 import_range = form.cleaned_data['ImportRange']
+                from_date = form.cleaned_data['FromDate']
+                to_date = form.cleaned_data['ToDate']
+
                 request.session['event_range'] = import_range
+                if from_date:
+                    request.session['event_from_date'] = from_date.strftime('%Y-%m-%d')
+                if to_date:
+                    request.session['event_to_date'] = to_date.strftime('%Y-%m-%d')
 
         if 'cronofy_access_token' in request.session:
             if _populate_tasks(request) == STATUS_CODES.NO_TOKEN:
@@ -397,20 +416,25 @@ def cronofy_access_token(request):
 
 def _populate_tasks(request):
     token = request.session.get('cronofy_access_token')
-    event_range = request.session.get('event_range')
     tzid = request.session.get('time_zone')
     login = request.session.get('login')
     user_id = request.session.get('user_id')
+    event_range = request.session.get('event_range')
 
-    to_date = date.today() + relativedelta(days=1)
-    to_date = to_date.strftime('%Y-%m-%d')
-    if 'Month' in event_range:
-        from_date = date.today() - relativedelta(months=1)
+    if event_range is None or event_range == '' or event_range == 'None':
+        to_date = request.session.get('event_to_date')
+        from_date = request.session.get('event_from_date')
     else:
-        num_weeks = int(float(event_range[:1]))
-        num_days = 7*num_weeks
-        from_date = date.today() - relativedelta(days=num_days)
-    from_date = from_date.strftime('%Y-%m-%d')
+        to_date = date.today() + relativedelta(days=1)
+        to_date = to_date.strftime('%Y-%m-%d')
+
+        if 'Month' in event_range:
+            from_date = date.today() - relativedelta(months=1)
+        else:
+            num_weeks = int(float(event_range[:1]))
+            num_days = 7*num_weeks
+            from_date = date.today() - relativedelta(days=num_days)
+            from_date = from_date.strftime('%Y-%m-%d')
 
     try:
         client = CronofyClient(token)

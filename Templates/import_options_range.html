@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Import Tasks{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="import_form">
+            <form class="form-inline" action="{% url 'import_tasks' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="input-group">
+                            <div class="input-group-addon">From</div>
+                            <input type="date" name="FromDate" class="form-control" placeholder="MM/DD/YYYY">
+                            <div class="input-group-addon">To</div>
+                            <input type="date" name="ToDate" class="form-control" placeholder="MM/DD/YYYY">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-primary">Import</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <hr>
+        <h1>Please Note</h1>
+        <p>
+            <li>Date range cannot span greater than one month.</li>
+            <li>Start date cannot be more than 45 days in the past.</li>
+        </p>
+    </div>
+</div>
+{% endblock %}

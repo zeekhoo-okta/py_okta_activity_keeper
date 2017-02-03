@@ -18,7 +18,8 @@ from django.contrib import admin
 
 from calendar_event_app.views import home_view, login_session, logout, register, registration_success,\
     task_view, my_tasks_view, preferences
-from calendar_event_app.views import import_options_view, import_tasks, cronofy_oauth_callback, cronofy_access_token
+from calendar_event_app.views import import_options_view, import_options_range_view, \
+    import_tasks, cronofy_oauth_callback, cronofy_access_token
 from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
 from calendar_event_app.views import forcecom_auth_init, forcecom_auth_complete, forcecom_oauth_auth
 from calendar_event_app.views import task_action
@@ -46,6 +47,7 @@ urlpatterns = [
 
     # cronofy
     url(r'^import_options/$', import_options_view, name='import_options'),
+    url(r'^import_options_range/$', import_options_range_view, name='import_options_range'),
     url(r'^import_tasks/$', import_tasks, name='import_tasks'),
     url(r'^cronofy/oauth/callback/$', cronofy_oauth_callback, name='cronofy_oauth_callback'),
     url(r'^cronofy/oauth/token/$', cronofy_access_token, name='cronofy_access_token'),

@@ -58,7 +58,9 @@ class AddTaskForm(forms.Form):
 
 
 class ImportTaskForm(forms.Form):
-    ImportRange = forms.CharField(max_length=30)
+    ImportRange = forms.CharField(max_length=30, required=False)
+    FromDate = forms.DateField(required=False)
+    ToDate = forms.DateField(required=False)
 
 
 class PreferenceForm(forms.Form):

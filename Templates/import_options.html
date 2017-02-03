@@ -3,26 +3,48 @@
 
 {% block content %}
 <div class="container">
-    <div class="import_form">
-        <form class="form-inline" action="{% url 'import_tasks' %}" method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <div class="input-group">
-                        <div class="input-group-addon">Previous</div>
-                        <select class="form-control" name="ImportRange">
-                            <option>1 Weeks</option>
-                            <option>2 Weeks</option>
-                            <option>3 Weeks</option>
-                            <option>Month</option>
-                        </select>
-                        <div class="input-group-btn">
-                            <button type="submit" class="btn btn-primary">Import</button>
+    <div class="row">
+        <div class="import_form">
+            <form class="form-inline" action="{% url 'import_tasks' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="input-group">
+                            <div class="input-group-addon">Previous</div>
+                            <select class="form-control" name="ImportRange">
+                                <option>1 Weeks</option>
+                                <option>2 Weeks</option>
+                                <option>3 Weeks</option>
+                                <option>Month</option>
+                            </select>
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-primary">Import</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <hr>
+        <h2>FAQ</h2>
+        <p>
+            <b>Why can't I import more than one month?</b><br>
+            <li>We use Cronofy to import calendar events. They can read up to a max of 45 days in the past. If you need to read from specific date ranges, go <a href="{% url 'import_options_range' %}">here</a></li>
+        </p>
+        <p>
+            <b>If I import the same week again, will I get duplicate tasks?</b>
+            <li>No. We keep track of imported calendar events in a db. You won't get duplicates even if you import multiple times.</li>
+        </p>
+        <p>
+            <b>Which calendar should I import from?</b>
+            <li>Choose Office 365</li>
+        </p>
+        <p>
+            <b>Why does it show all these other Calendars?</b>
+        <li>The calendar events are read by <a href="https://www.cronofy.com/" target="_blank">Cronofy</a>. It's their standard UI. Some day, I'll figure out how to default to O365</li>
+        </p>
     </div>
 </div>
 {% endblock %}
