@@ -21,6 +21,8 @@ TYPE_CHOICES = (
     ('Develop Architecture', 'Develop Architecture'),
     ('Marketing Event', 'Marketing Event'),
     ('Training', 'Training'),
+    ('Partner', 'Partner'),
+    ('Customer Support', 'Customer Support')
 )
 
 

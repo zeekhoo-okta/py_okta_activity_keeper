@@ -67,17 +67,19 @@
       </div>
     </nav>
 
-    <div class="container">
-    {% bootstrap_messages %}
-    </div>
 
-    <div class="bg-fill">
+    <div class="pad-hd-sp">
+      {% if messages %}
+      {% bootstrap_messages %}
+      {% endif %}
+
       {% block content %}
       {% endblock content %}
     </div>
 
-    {% block page_js %}{% endblock page_js %}
 
+
+    {% block page_js %}{% endblock page_js %}
   </body>
 
 </html>

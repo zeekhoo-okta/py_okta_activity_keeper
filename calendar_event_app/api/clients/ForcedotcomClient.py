@@ -11,6 +11,10 @@ class ForcedotcomClient(object):
         self.version = settings.SFDC_API_VERSION
         self.token = token
         self.pre_sales_tasks_id = None
+        self.namespace_prefix = ''
+
+        if settings.SFDC_NAMESPACE_PREFIX:
+            self.namespace_prefix = settings.SFDC_NAMESPACE_PREFIX + '__'
 
         if not self.base_url:
             raise ValueError('Invalid base_url')
@@ -28,6 +32,23 @@ class ForcedotcomClient(object):
         response = requests.get(self.base_url + '/services/data/' + self.version + '/recent/?limit=0',
                                 headers=self.headers)
         return response.status_code == 200
+
+    def is_team_member(self, user_id, opportunity_id):
+        q = 'SELECT+count%28OpportunityId%29+FROM+OpportunityTeamMember+WHERE+UserId%3D%27' + user_id + '%27+AND+OpportunityId%3D%27' + opportunity_id + '%27'
+        print('q = {}'.format(q))
+        try:
+            result = requests.get(self.base_url + '/services/data/' + self.version + '/query/?q=' + q,
+                                  headers=self.headers)
+            print('result = {}'.format(result))
+            records = result.json()['records']
+            print('records = {}'.format(records))
+            for r in records:
+                if int(r['expr0']) > 0:
+                    return True
+            return False
+        except Exception as e:
+            raise APIError(message='Could not read OpportunityTeamMember. {}'.format(e), status_code=400)
+        return True
 
     def _record_type_id(self, record_type):
         if self.pre_sales_tasks_id:
@@ -117,6 +138,7 @@ class ForcedotcomClient(object):
                         if column['fieldNameOrPath'] == 'Owner.Alias':
                             opportunity['Owner'] = column['value']
                     recent_opportunities.append(opportunity)
+
         return recent_opportunities
 
     def post_task(self, op, subject, activity_date, time_spent, task_type):
@@ -129,7 +151,7 @@ class ForcedotcomClient(object):
                 'Subject': subject,
                 'Status': 'Completed',
                 'ActivityDate': activity_date,
-                'Time_Spent_minutes__c': time_spent,
+                '{}Time_Spent_minutes__c'.format(self.namespace_prefix): time_spent,
                 'Type': task_type,
                 'RecordTypeId': rt_id
             }
@@ -139,7 +161,7 @@ class ForcedotcomClient(object):
                 'Subject': subject,
                 'Status': 'Completed',
                 'ActivityDate': activity_date,
-                'Time_Spent_minutes__c': time_spent,
+                '{}Time_Spent_minutes__c'.format(self.namespace_prefix): time_spent,
                 'Type': task_type,
                 'RecordTypeId': rt_id
             }

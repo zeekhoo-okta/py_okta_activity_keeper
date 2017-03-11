@@ -28,16 +28,24 @@ function drawTable(tableData) {
     var i;
     var draw = "";
     for(i = 0; i < tableData.length; i++) {
+        opportunity_id = '-1'
+        if (tableData[i].Id != null) {
+            opportunity_id = tableData[i].Id;
+        }
         draw += '<tr>' +
-        '<td style="display:none">' + tableData[i].Id + '</td>' +
+        '<td style="display:none">' + opportunity_id + '</td>' +
         '<td style="display:none">' + tableData[i].Name + '</td>' +
-        '<td>' + tableData[i].Name +
-        '<br><p style="font-size:11px">' +
-        'Owner:&nbsp;' + tableData[i].Owner + '&nbsp;&nbsp;Amount:&nbsp;' + tableData[i].Amount +
-        '</p>' +
-        '</td>' +
-        '<td style="font-size:11px">' + tableData[i].Stage + '<br>' + 'Close:&nbsp;' + tableData[i].CloseDate + '</td>' +
-        '</tr>';
+        '<td>' + tableData[i].Name;
+
+        if (tableData[i].Owner != null) {
+            draw += '<br><p style="font-size:11px">' +
+            'Owner:&nbsp;' + tableData[i].Owner + '&nbsp;&nbsp;Amount:&nbsp;' + tableData[i].Amount +
+            '</p>' +
+            '</td>' +
+            '<td style="font-size:11px">' + tableData[i].Stage + '<br>' + 'Close:&nbsp;' + tableData[i].CloseDate + '</td>';
+        }
+
+        draw += '</tr>';
     }
     document.getElementById('search_results').innerHTML = draw;
     document.getElementById('selectedOp').innerHTML = '';
@@ -56,16 +64,16 @@ function selectOp() {
         }
         if (target) {
             var cells = target.getElementsByTagName("td");
-            var op = cells[1].innerHTML;
             var opId = cells[0].innerHTML;
+            if (opId != '-1') {
+                var op = cells[1].innerHTML;
+                document.getElementById('selectedOp').innerHTML = '<p class="form-control-static">' + op + '</p>';
+                document.getElementById('selectedOpId').innerHTML = '<p class="form-control-static">' + opId + '</p>';
+                document.getElementById('opportunity_id').value = opId;
 
-            document.getElementById('selectedOp').innerHTML = '<p class="form-control-static">' + op + '</p>';
-            document.getElementById('selectedOpId').innerHTML = '<p class="form-control-static">' + opId + '</p>';
-            document.getElementById('opportunity_id').value = opId;
-
-            document.getElementById('search_results').innerHTML = '';
-            document.getElementById('tab_head').innerHTML = '';
-
+                document.getElementById('search_results').innerHTML = '';
+                document.getElementById('tab_head').innerHTML = '';
+            }
         }
     };
 }

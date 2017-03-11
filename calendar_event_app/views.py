@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import date, datetime
+from datetime import date
 
 from api.clients.CronofyClient import CronofyClient
 from api.clients.ForcedotcomClient import ForcedotcomClient
@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
 
 from calendar_event_app.api.StatusCodes import StatusCodes
 from forms import AddTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
@@ -245,6 +246,9 @@ def task_view(request, p):
                 activity_date = form.cleaned_data['activity_date'].strftime('%Y-%m-%-d')
                 opportunity_id = form.cleaned_data['opportunity_id']
 
+                # is_team_member = client.is_team_member(request.session['user_id'], opportunity_id)
+                # print('is_team_member? {}'.format(is_team_member))
+
                 result = client.post_task(
                     opportunity_id,
                     form.cleaned_data['subject'],
@@ -444,7 +448,7 @@ def _populate_tasks(request):
             result = client.get_calendars()
             event_calendars = result['calendars']
             for calendar in event_calendars:
-                if calendar['calendar_name'] == 'Calendar' and calendar['profile_name'] == login:
+                if calendar['calendar_name'] == 'Calendar' and calendar['profile_name'].upper() == login.upper():
                     calendar_id = calendar['calendar_id']
         except Unauthorized as e:
             if 'cronofy_access_token' in request.session:
@@ -463,10 +467,14 @@ def _populate_tasks(request):
         result = client.get_events(params)
         events = result['events']
 
+        skipped = 0
+        added = 0
         for event in events:
             if not len(event['start']) == 10:
                 task = Task.objects.filter(event_uid=event['event_uid'])
-                if not task:
+                if task:
+                    skipped += 1
+                else:
                     attendee_list = ''
                     attendees = event['attendees']
                     for attendee in attendees:
@@ -485,9 +493,11 @@ def _populate_tasks(request):
                                status_code='N'
                                )
                     new.save()
+                    added += 1
     except Exception as e:
         print("There was an exception: {}".format(e))
 
+    messages.success(request, 'Import summary: Added {0} tasks, Skipped {1} (already imported previously)'.format(added, skipped))
     return STATUS_CODES.SUCCESS
 
 
@@ -563,6 +573,9 @@ def forcecom_search(request):
             opportunities = client.search_opportunities(q)
         else:
             opportunities = client.recent_opportunities()
+
+        if len(opportunities) <= 0:
+            opportunities.append({'Name': 'No results'})
 
         response = json.dumps({'opportunities': opportunities})
 
