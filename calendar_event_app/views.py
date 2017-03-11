@@ -497,7 +497,10 @@ def _populate_tasks(request):
     except Exception as e:
         print("There was an exception: {}".format(e))
 
-    messages.success(request, 'Import summary: Added {0} tasks, Skipped {1} (already imported previously)'.format(added, skipped))
+    msg = 'Import summary: Added {} tasks'.format(added)
+    if skipped > 0:
+        msg += ', Skipped {} (already imported previously)'.format(skipped)
+    messages.success(request, msg)
     return STATUS_CODES.SUCCESS
 
 
