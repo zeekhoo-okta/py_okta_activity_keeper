@@ -464,8 +464,7 @@ def _populate_tasks(request):
             "from": from_date,
             "to": to_date,
         }
-        result = client.get_events(params)
-        events = result['events']
+        events = client.get_events(params)
 
         skipped = 0
         added = 0

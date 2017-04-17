@@ -37,5 +37,31 @@ class CronofyClient(object):
     def get_events(self, params):
         params_str = dict_to_query_params(params)
         response = requests.get(self.base_url + '/events' + params_str, headers=self.headers)
-        return response.json()
+        result = response.json()
 
+        events = []
+        next_page_events = []
+        if 'pages' in result:
+            pages = result['pages']
+            if 'next_page' in pages:
+                next_page_events = self.__events_next_page(pages['next_page'])
+        if 'events' in result:
+            events = result['events']
+
+        return events + next_page_events
+
+    def __events_next_page(self, url):
+        events = []
+        next_page_events = []
+
+        response = requests.get(url, headers=self.headers)
+        result = response.json()
+        if 'pages' in result:
+            pages = result['pages']
+            if 'next_page' in pages:
+                next_page_events = self.__events_next_page(pages['next_page'])
+
+        if 'events' in result:
+            events = result['events']
+
+        return events + next_page_events
