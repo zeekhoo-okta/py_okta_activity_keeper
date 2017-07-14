@@ -6,6 +6,7 @@ from api.clients.CronofyClient import CronofyClient
 from api.clients.ForcedotcomClient import ForcedotcomClient
 from api.clients.ForcedotcomOAuthClient import ForcedotcomOAuthClient
 from api.clients.UserClient import UserClient
+from api.clients.OidcClient import OidcClient
 from api.utils import dict_to_query_params
 from api.errors import *
 from dateutil.relativedelta import relativedelta
@@ -14,6 +15,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 from calendar_event_app.api.StatusCodes import StatusCodes
 from forms import AddTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
@@ -21,6 +23,8 @@ from models import Task, UserPreference
 
 
 OKTA_ORG = ''.join(['https://', settings.OKTA_ORG])
+ENV = {'okta_org': OKTA_ORG, 'client_id': settings.CLIENT_ID}
+
 SESSION_COOKIES = ['userId',
                    'user_id',
                    'login',
@@ -39,47 +43,97 @@ def logout(request):
     for name in SESSION_COOKIES:
         if name in request.session:
             del request.session[name]
-    return render(request, 'logged_out.html')
+    return render(request, 'logged_out.html', ENV)
 
 
-def login_session(request):
+@csrf_exempt
+def oidc_callback(request):
     if request.method == 'POST':
-        user = json.loads(request.body)
+        if 'id_token' in request.POST:
+            id_token = request.POST['id_token']
+            #introspect
+            oidcClient = OidcClient(OKTA_ORG)
+            response = oidcClient.introspect(settings.CLIENT_ID, settings.CLIENT_SECRET, id_token, "id_token")
+            status = response.status_code
+            if status == 200:
+                token = response.json()
 
-        # Set the Okta session
-        user_id = user['id']
-        profile = user['profile']
-        if profile['firstName'] and profile['lastName']:
-            name = profile['firstName'] + ' ' + profile['lastName']
-        else:
-            name = 'Unknown'
-        if profile['timeZone']:
-            time_zone = profile['timeZone']
-        else:
-            time_zone = 'America/Los_Angeles'
+                # Set the Okta session
+                user_id = token['sub']
+                if token['name']:
+                    name = token['name']
+                elif token['given_name'] and token['family_name']:
+                    name = token['given_name'] + ' ' + token['family_name']
+                else:
+                    name = 'Unknown'
 
-        request.session['user_id'] = user_id
-        try:
-            preference = get_object_or_404(UserPreference, okta_user_id=user_id)
-            preference.name = name
-            if not preference.time_zone or preference.time_zone == '':
-                preference.time_zone = time_zone
-            else:
-                time_zone = preference.time_zone
-            preference.save()
-        except Exception as e:
-            print(e)
-            preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
-            preference.save()
+                if token['zoneinfo']:
+                    time_zone = token['zoneinfo']
+                else:
+                    time_zone = 'America/Los_Angeles'
 
-        if profile['login']:
-            request.session['login'] = profile['login']
-        else:
-            request.session['login'] = None
+                request.session['user_id'] = user_id
+                try:
+                    preference = get_object_or_404(UserPreference, okta_user_id=user_id)
+                    preference.name = name
+                    if not preference.time_zone or preference.time_zone == '':
+                        preference.time_zone = time_zone
+                    else:
+                        time_zone = preference.time_zone
+                    preference.save()
+                except Exception as e:
+                    print(e)
+                    preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
+                    preference.save()
 
-        request.session['time_zone'] = time_zone
+                if token['username']:
+                    request.session['login'] = token['username']
+                else:
+                    request.session['login'] = None
+
+                request.session['time_zone'] = time_zone
 
     return HttpResponseRedirect(reverse_lazy('home'))
+
+
+# def login_session(request):
+#     if request.method == 'POST':
+#         user = json.loads(request.body)
+#
+#         # Set the Okta session
+#         user_id = user['id']
+#         profile = user['profile']
+#         if profile['firstName'] and profile['lastName']:
+#             name = profile['firstName'] + ' ' + profile['lastName']
+#         else:
+#             name = 'Unknown'
+#         if profile['timeZone']:
+#             time_zone = profile['timeZone']
+#         else:
+#             time_zone = 'America/Los_Angeles'
+#
+#         request.session['user_id'] = user_id
+#         try:
+#             preference = get_object_or_404(UserPreference, okta_user_id=user_id)
+#             preference.name = name
+#             if not preference.time_zone or preference.time_zone == '':
+#                 preference.time_zone = time_zone
+#             else:
+#                 time_zone = preference.time_zone
+#             preference.save()
+#         except Exception as e:
+#             print(e)
+#             preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
+#             preference.save()
+#
+#         if profile['login']:
+#             request.session['login'] = profile['login']
+#         else:
+#             request.session['login'] = None
+#
+#         request.session['time_zone'] = time_zone
+#
+#     return HttpResponseRedirect(reverse_lazy('home'))
 
 
 def register(request):
@@ -138,8 +192,7 @@ def home_view(request):
     try:
         _nosession_check(request)
     except NoSession as e:
-        c = {'okta_org': OKTA_ORG}
-        return render(request, 'index.html', c)
+        return render(request, 'index.html', ENV)
 
     return HttpResponseRedirect(reverse('mytasks'))
 

@@ -48,6 +48,8 @@ CRONOFY_CLIENT_SECRET = os.environ.get('CRONOFY_CLIENT_SECRET')
 MYSQL_USER = os.environ.get('MYSQL_USER')
 MYSQL_USER_PWD = os.environ.get('MYSQL_USER_PWD')
 
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 INSTALLED_APPS = [
     'django.contrib.admin',

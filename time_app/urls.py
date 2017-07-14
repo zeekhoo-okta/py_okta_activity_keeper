@@ -16,13 +16,14 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from calendar_event_app.views import home_view, login_session, logout, register, registration_success,\
+from calendar_event_app.views import home_view, logout, register, registration_success,\
     task_view, my_tasks_view, preferences
 from calendar_event_app.views import import_options_view, import_options_range_view, \
     import_tasks, cronofy_oauth_callback, cronofy_access_token
 from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
 from calendar_event_app.views import forcecom_auth_init, forcecom_auth_complete, forcecom_oauth_auth
 from calendar_event_app.views import task_action
+from calendar_event_app.views import oidc_callback
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
@@ -33,11 +34,14 @@ urlpatterns = [
 
     # home, login, logout
     url(r'^$', home_view, name='home'),
-    url(r'^login/$', login_session, name='login'),
+    # url(r'^login/$', login_session, name='login'),
     url(r'^logout/$', logout, name='logout'),
     url(r'^register/$', register, name='register'),
     url(r'^register/success/$', registration_success, name='registration_success'),
     url(r'^preferences/$', preferences, name='preferences'),
+
+    # oidc
+    url(r'^oidc/callback/$', oidc_callback, name='oidc_callback'),
 
     # task
     url(r'^task/([a-zA-Z0-9]+)/$', task_view, name='task'),
