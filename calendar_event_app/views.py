@@ -23,7 +23,11 @@ from models import Task, UserPreference
 
 
 OKTA_ORG = ''.join(['https://', settings.OKTA_ORG])
-ENV = {'okta_org': OKTA_ORG, 'client_id': settings.CLIENT_ID}
+ENV = {
+    'okta_org': OKTA_ORG,
+    'client_id': settings.CLIENT_ID,
+    'app_url': settings.APP_URL
+}
 
 SESSION_COOKIES = ['userId',
                    'user_id',

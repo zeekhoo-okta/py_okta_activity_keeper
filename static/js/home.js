@@ -2,20 +2,23 @@ function getBaseUrl() {
     element = document.getElementById('okta-org');
     return element.innerHTML;
 }
-
 function getClientId() {
     element = document.getElementById('client-id');
     return element.innerHTML;
 }
+function getAppUrl() {
+    element = document.getElementById('app-url');
+    return element.innerHTML;
+}
 
 var baseUrl = getBaseUrl();
+var redirectUri = getAppUrl() + '/oidc/callback/';
 var clientId = getClientId();
-var current_Url = window.location.href;
 
 var oktaSignIn = new OktaSignIn({
     baseUrl: baseUrl,
     clientId: clientId,
-    redirectUri: current_Url + "oidc/callback/",
+    redirectUri: redirectUri,
     authParams: {
         display: 'page',
         responseType: ['id_token'],
@@ -45,7 +48,7 @@ oktaSignIn.session.get(function (res) {
         var authClient = new OktaAuth({
             url: baseUrl,
             clientId: clientId,
-            redirectUri: current_Url + "oidc/callback/",
+            redirectUri: redirectUri,
         });
         authClient.token.getWithRedirect({
             responseType: ['id_token'],
