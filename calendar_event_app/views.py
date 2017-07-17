@@ -52,8 +52,22 @@ def logout(request):
 
 @csrf_exempt
 def oidc_callback(request):
+    if ('okta-oauth-state' in request.COOKIES and
+            'okta-oauth-nonce' in request.COOKIES):
+        # Current AuthJS Cookie Setters
+        state = request.COOKIES['okta-oauth-state']
+        nonce = request.COOKIES['okta-oauth-nonce']
+    else:
+        return HttpResponse('Error setting and/or retrieving cookies', status=401)
+
     if request.method == 'POST':
-        if 'id_token' in request.POST:
+        # Verify state
+        if not state or 'state' not in request.POST or request.POST['state'] != state:
+            return HttpResponse('State from cookie does not match query state', status=401)
+
+        if 'id_token' not in request.POST:
+            return HttpResponse('No id_token in request POST', status=401)
+        else:
             id_token = request.POST['id_token']
             #introspect
             oidcClient = OidcClient(OKTA_ORG)
