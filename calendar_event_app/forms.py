@@ -6,23 +6,21 @@ from django.conf import settings
 
 TYPE_CHOICES = (
     ('None', '---'),
-    ('Other', 'Other'),
-    ('Meeting Prep', 'Meeting Prep'),
-    ('POC Prep', 'POC Prep'),
-    ('Rfx', 'Rfx'),
-    ('POC', 'POC'),
-    ('White Boarding', 'White Boarding'),
-    ('Demo/Presentation', 'Demo/Presentation'),
-    ('Discovery', 'Discovery'),
-    ('Followup', 'Followup'),
-    ('Admin', 'Admin'),
-    ('Travel', 'Travel'),
-    ('BVA', 'BVA'),
-    ('Develop Architecture', 'Develop Architecture'),
-    ('Marketing Event', 'Marketing Event'),
-    ('Training', 'Training'),
-    ('Partner', 'Partner'),
-    ('Customer Support', 'Customer Support')
+    ('Other','Other'),
+    ('Rfx','Rfx'),
+    ('POC','POC'),
+    ('Demo/Presentation','Demo/Presentation'),
+    ('Discovery','Discovery'),
+    ('Admin','Admin'),
+    ('Travel','Travel'),
+    ('BVA','BVA'),
+    ('Marketing Event','Marketing Event'),
+    ('Training','Training'),
+    ('Partner','Partner'),
+    ('Customer Support','Customer Support'),
+    ('Mutual Delivery Plan (MDP)','Mutual Delivery Plan (MDP)'),
+    ('Prep Time/Follow-Up','Prep Time/Follow-Up'),
+    ('Solutioning','Solutioning')
 )
 
 
