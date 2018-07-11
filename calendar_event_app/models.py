@@ -2,10 +2,11 @@ from django.db import models
 from django.conf import settings
 from dateutil import tz
 from datetime import datetime
-import pytz
+import requests
 
 from_zone = tz.gettz(settings.TIME_ZONE)
 ama_la = 'America/Los_Angeles'
+
 
 class Task(models.Model):
     to_zone = tz.gettz(ama_la)
@@ -71,3 +72,31 @@ class UserPreference(models.Model):
 
     class Meta:
         db_table = "user_preference"
+
+
+class StatusCodes(object):
+    def __init__(self):
+        self.NO_TOKEN = 'NO_TOKEN'
+        self.NO_CALENDAR = 'NO_CALENDAR'
+        self.SUCCESS = 'SUCCESS'
+
+
+# class Config:
+#     def __init__(self):
+#         self.org_url = 'https://{}'.format(settings.OKTA_ORG)
+#         self.grant_type = 'authorization_code'
+#         self.client_id = settings.CLIENT_ID
+#         self.client_secret = settings.CLIENT_SECRET
+#         self.issuer = settings.ISSUER
+#         self.scopes = 'openid profile'
+#         self.redirect_uri = '{}/oidc/callback'.format(settings.APP_URL)
+
+
+# class DiscoveryDocument:
+#     # Find the OIDC metadata through discovery
+#     def __init__(self, issuer_uri):
+#         r = requests.get(issuer_uri + "/.well-known/openid-configuration")
+#         self.json = r.json()
+#
+#     def getJson(self):
+#         return self.json

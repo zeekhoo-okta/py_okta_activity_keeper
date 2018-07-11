@@ -1,7 +1,7 @@
 import requests
 from django.conf import settings
-from ...api.errors import Unauthorized, APIError
-from ...api.utils import dict_to_query_params
+from calendar_event_app.errors import Unauthorized, APIError
+from calendar_event_app.utils import dict_to_query_params
 import json
 
 

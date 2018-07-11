@@ -1,6 +1,6 @@
 import requests
 from django.conf import settings
-from ...api.errors import Unauthorized, APIError
+from calendar_event_app.errors import Unauthorized, APIError
 import json
 import urllib
 

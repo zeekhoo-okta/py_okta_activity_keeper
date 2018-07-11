@@ -1,17 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Logged out{% endblock %}
 {% block head %}
-<script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/1.10.0/js/okta-sign-in.min.js" type="text/javascript"></script>
+<script src="https://ok1static.oktacdn.com/assets/js/sdk/okta-signin-widget/2.9.0/js/okta-sign-in.min.js" type="text/javascript"></script>
  Logged out
 {% endblock %}
 {% block content %}
-<div id="okta-org" class="hidden">{{ okta_org }}</div>
 <div class="container">
     <h2>Logged out.</h2>
 </div>
 {% endblock %}
 
-{% load static %}
 {% block page_js %}
-<script src="{% static 'js/logout_okta.min.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+var oktaSignIn = new OktaSignIn({
+    baseUrl: '{{ okta_org }}',
+});
+oktaSignIn.session.get(function (res) {
+    if (res.status === 'ACTIVE') {
+        oktaSignIn.session.close(function (err) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+        });
+    }
+})
+</script>
 {% endblock page_js %}

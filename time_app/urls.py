@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from calendar_event_app.views import home_view, logout, register, registration_success,\
+from calendar_event_app.views import login_view, home_view, logout, register, registration_success,\
     task_view, my_tasks_view, preferences
 from calendar_event_app.views import import_options_view, import_options_range_view, \
     import_tasks, cronofy_oauth_callback, cronofy_access_token
@@ -34,10 +34,10 @@ urlpatterns = [
 
     # home, login, logout
     url(r'^$', home_view, name='home'),
-    # url(r'^login/$', login_session, name='login'),
+    url(r'^login/$', login_view, name='login'),
     url(r'^logout/$', logout, name='logout'),
-    url(r'^register/$', register, name='register'),
-    url(r'^register/success/$', registration_success, name='registration_success'),
+    # url(r'^register/$', register, name='register'),
+    # url(r'^register/success/$', registration_success, name='registration_success'),
     url(r'^preferences/$', preferences, name='preferences'),
 
     # oidc

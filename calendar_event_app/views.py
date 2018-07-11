@@ -1,32 +1,31 @@
-import json
-import requests
-from datetime import date
-
-from api.clients.CronofyClient import CronofyClient
-from api.clients.ForcedotcomClient import ForcedotcomClient
-from api.clients.ForcedotcomOAuthClient import ForcedotcomOAuthClient
-from api.clients.UserClient import UserClient
-from api.clients.OidcClient import OidcClient
-from api.utils import dict_to_query_params
-from api.errors import *
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
 
-from calendar_event_app.api.StatusCodes import StatusCodes
+from clients.CronofyClient import *
+from clients.ForcedotcomClient import *
+from clients.ForcedotcomOAuthClient import *
+from clients.UserClient import UserClient
+from clients.OidcClient import *
+from errors import *
+
+from utils import dict_to_query_params
 from forms import AddTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
-from models import Task, UserPreference
+from models import Task, UserPreference, StatusCodes
+from tokens import TokenValidator
+from decorators import okta_login_required, sfdc_login_required
 
 
 OKTA_ORG = ''.join(['https://', settings.OKTA_ORG])
 ENV = {
     'okta_org': OKTA_ORG,
     'client_id': settings.CLIENT_ID,
-    'app_url': settings.APP_URL
+    'app_url': settings.APP_URL,
+    'issuer': settings.ISSUER
 }
 
 SESSION_COOKIES = ['userId',
@@ -50,66 +49,66 @@ def logout(request):
     return render(request, 'logged_out.html', ENV)
 
 
-@csrf_exempt
 def oidc_callback(request):
-    if ('okta-oauth-state' in request.COOKIES and
-            'okta-oauth-nonce' in request.COOKIES):
-        # Current AuthJS Cookie Setters
-        state = request.COOKIES['okta-oauth-state']
-        nonce = request.COOKIES['okta-oauth-nonce']
-    else:
-        return HttpResponse('Error setting and/or retrieving cookies', status=401)
-
     if request.method == 'POST':
+        return HttpResponse({'error': 'Endpoint not supported'})
+    else:
+        if ('okta-oauth-state' in request.COOKIES and
+                'okta-oauth-nonce' in request.COOKIES):
+            # Current AuthJS Cookie Setters
+            state = request.COOKIES['okta-oauth-state']
+            nonce = request.COOKIES['okta-oauth-nonce']
+        else:
+            return HttpResponse('Error setting and/or retrieving cookies', status=401)
+
         # Verify state
-        if not state or 'state' not in request.POST or request.POST['state'] != state:
+        if not state or 'state' not in request.GET or request.GET['state'] != state:
             return HttpResponse('State from cookie does not match query state', status=401)
 
-        if 'id_token' not in request.POST:
-            return HttpResponse('No id_token in request POST', status=401)
+        if 'code' not in request.GET:
+            return HttpResponse('authorization_code missing from request', status=401)
+
+        validator = TokenValidator()
+        tokens = validator.call_token_endpoint(request.GET['code'])
+        if 'id_token' not in tokens:
+            return HttpResponse('No id_token', status=401)
         else:
-            id_token = request.POST['id_token']
-            #introspect
-            oidcClient = OidcClient(OKTA_ORG)
-            response = oidcClient.introspect(settings.CLIENT_ID, settings.CLIENT_SECRET, id_token, "id_token")
-            status = response.status_code
-            if status == 200:
-                token = response.json()
+            token = validator.validate_id_token(tokens['id_token'], nonce)
 
-                # Set the Okta session
-                user_id = token['sub']
-                if token['name']:
-                    name = token['name']
-                elif token['given_name'] and token['family_name']:
-                    name = token['given_name'] + ' ' + token['family_name']
+            # Set the Okta session
+            user_id = token['sub']
+            if 'name' in token:
+                name = token['name']
+            elif 'given_name' in token and 'family_name' in token:
+                name = token['given_name'] + ' ' + token['family_name']
+            else:
+                name = 'Unknown'
+
+            if 'zoneinfo' in token:
+                time_zone = token['zoneinfo']
+            else:
+                time_zone = 'America/Los_Angeles'
+
+            request.session['user_id'] = user_id
+            try:
+                preference = get_object_or_404(UserPreference, okta_user_id=user_id)
+                preference.name = name
+                if not preference.time_zone or preference.time_zone == '':
+                    preference.time_zone = time_zone
                 else:
-                    name = 'Unknown'
+                    time_zone = preference.time_zone
+                preference.save()
+            except Exception as e:
+                print(e)
+                preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
+                preference.save()
 
-                if token['zoneinfo']:
-                    time_zone = token['zoneinfo']
-                else:
-                    time_zone = 'America/Los_Angeles'
+            if token['username']:
+                request.session['login'] = token['username']
+            else:
+                request.session['login'] = None
 
-                request.session['user_id'] = user_id
-                try:
-                    preference = get_object_or_404(UserPreference, okta_user_id=user_id)
-                    preference.name = name
-                    if not preference.time_zone or preference.time_zone == '':
-                        preference.time_zone = time_zone
-                    else:
-                        time_zone = preference.time_zone
-                    preference.save()
-                except Exception as e:
-                    print(e)
-                    preference = UserPreference(okta_user_id=user_id, name=name, time_zone=time_zone)
-                    preference.save()
-
-                if token['username']:
-                    request.session['login'] = token['username']
-                else:
-                    request.session['login'] = None
-
-                request.session['time_zone'] = time_zone
+            request.session['time_zone'] = time_zone
 
     return HttpResponseRedirect(reverse_lazy('home'))
 
@@ -179,42 +178,16 @@ def registration_success(request):
     return render(request, 'registration_success.html')
 
 
-def _nosession_check(request):
-    if 'user_id' in request.session:
-        return request.session['user_id']
-    else:
-        raise NoSession()
-
-    return None
+def login_view(request):
+    return render(request, 'index.html', ENV)
 
 
-def _forcecom_session_check(request):
-    try:
-        _nosession_check(request)
-        if 'forcecom_access_token' in request.session:
-            token = request.session['forcecom_access_token']
-            client = ForcedotcomClient(token)
-            if client.check_token():
-                return token
-            else:
-                raise NoSfdcSession()
-        else:
-            raise NoSfdcSession()
-    except NoSession as e:
-        raise NoSession()
-
-    return None
-
-
+@okta_login_required
 def home_view(request):
-    try:
-        _nosession_check(request)
-    except NoSession as e:
-        return render(request, 'index.html', ENV)
-
     return HttpResponseRedirect(reverse('mytasks'))
 
 
+@okta_login_required
 def preferences(request):
     try:
         user_id = _nosession_check(request)
@@ -233,14 +206,14 @@ def preferences(request):
                     # Save time zone preferece onto user profile
 
             return HttpResponseRedirect(reverse('mytasks'))
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
     except Exception as e:
         print(e)
 
     return render(request, 'preferences.html', {'form': preference})
 
 
+@okta_login_required
+@sfdc_login_required
 def task_action(request, p):
     try:
         response = HttpResponse()
@@ -273,39 +246,27 @@ def task_action(request, p):
                 if status < 300:
                     task.status_code = 'C'
                     task.save()
-
-    except NoSession as e:
-        # return HttpResponseRedirect(reverse_lazy('home'))
-        response.status_code = 401
-    except NoSfdcSession as e:
-        # return HttpResponseRedirect(reverse('forcecom_auth_init'))
-        response.status_code = 401
-    except Unauthorized as e:
-        response.status_code = 401
     except Exception as e:
-        response.status_code = 400
+        print('There was an error: {}'.format(e.message))
 
     return response
 
 
+@okta_login_required
+@sfdc_login_required
 def task_view(request, p):
     task = None
 
-    try:
-        _nosession_check(request)
+    if p != 'new':
+        task = Task.objects.get(pk=p)
 
-        if p != 'new':
-            task = Task.objects.get(pk=p)
-
-        if request.method == 'DELETE':
-            if task:
-                task.status_code = 'C'
-                task.save()
-            response = HttpResponse()
-            response.status_code = 204
-            return response
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+    if request.method == 'DELETE':
+        if task:
+            task.status_code = 'C'
+            task.save()
+        response = HttpResponse()
+        response.status_code = 204
+        return response
 
     try:
         token = _forcecom_session_check(request)
@@ -351,140 +312,114 @@ def task_view(request, p):
                 'subject': '',
                 'time_spent': 0
             })
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
-    except NoSfdcSession or Unauthorized as e:
-        return HttpResponseRedirect(reverse('forcecom_auth_init'))
     except Exception as e:
         print('There was an error: {}'.format(e.message))
 
     return render(request, 'task.html', {'form': form, 'id': p})
 
 
+@okta_login_required
 def my_tasks_view(request):
-    try:
-        user_id = _nosession_check(request)
+    user_id = _nosession_check(request)
 
-        if 'time_zone' in request.session:
-            time_zone = request.session['time_zone']
-        else:
-            time_zone = 'America/Los_Angeles'
+    if 'time_zone' in request.session:
+        time_zone = request.session['time_zone']
+    else:
+        time_zone = 'America/Los_Angeles'
 
-        list_of_tasks = Task.objects.filter(okta_user_id=user_id, status_code='N').order_by('start')
-        dates = []
-        for task in list_of_tasks:
-            task.set_tz(time_zone)
-            if task.start_date_local() not in dates:
-                dates.append(task.start_date_local())
+    list_of_tasks = Task.objects.filter(okta_user_id=user_id, status_code='N').order_by('start')
+    dates = []
+    for task in list_of_tasks:
+        task.set_tz(time_zone)
+        if task.start_date_local() not in dates:
+            dates.append(task.start_date_local())
 
-        c = {'tasks': list_of_tasks, 'dates': dates}
+    c = {'tasks': list_of_tasks, 'dates': dates}
 
-        if 'forcecom_access_token' in request.session:
-            c['has_token'] = '1'
-
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+    if 'forcecom_access_token' in request.session:
+        c['has_token'] = '1'
 
     return render(request, 'tasks.html', c)
 
 
+@okta_login_required
 def import_options_view(request):
-    try:
-        _nosession_check(request)
-        form = ImportTaskForm()
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+    form = ImportTaskForm()
 
     return render(request, 'import_options.html', {'form': form})
 
 
+@okta_login_required
 def import_options_range_view(request):
-    try:
-        _nosession_check(request)
-        form = ImportTaskForm()
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+    form = ImportTaskForm()
 
     return render(request, 'import_options_range.html', {'form': form})
 
 
+@okta_login_required
 def import_tasks(request):
-    try:
-        _nosession_check(request)
+    if request.method == 'POST':
+        form = ImportTaskForm(request.POST)
+        if form.is_valid():
+            import_range = form.cleaned_data['ImportRange']
+            from_date = form.cleaned_data['FromDate']
+            to_date = form.cleaned_data['ToDate']
 
-        if request.method == 'POST':
-            form = ImportTaskForm(request.POST)
-            if form.is_valid():
-                import_range = form.cleaned_data['ImportRange']
-                from_date = form.cleaned_data['FromDate']
-                to_date = form.cleaned_data['ToDate']
+            request.session['event_range'] = import_range
+            if from_date:
+                request.session['event_from_date'] = from_date.strftime('%Y-%m-%d')
+            if to_date:
+                request.session['event_to_date'] = to_date.strftime('%Y-%m-%d')
 
-                request.session['event_range'] = import_range
-                if from_date:
-                    request.session['event_from_date'] = from_date.strftime('%Y-%m-%d')
-                if to_date:
-                    request.session['event_to_date'] = to_date.strftime('%Y-%m-%d')
-
-        if 'cronofy_access_token' in request.session:
-            if _populate_tasks(request) == STATUS_CODES.NO_TOKEN:
-                return HttpResponseRedirect(reverse('import_tasks'))
-            else:
-                return HttpResponseRedirect(reverse('mytasks'))
+    if 'cronofy_access_token' in request.session:
+        if _populate_tasks(request) == STATUS_CODES.NO_TOKEN:
+            return HttpResponseRedirect(reverse('import_tasks'))
         else:
-            base = settings.CRONOFY_AUTH_URL + "/authorize"
-            params = {
-                'response_type': 'code',
-                'client_id': settings.CRONOFY_CLIENT_ID,
-                'redirect_uri': settings.APP_URL + '/cronofy/oauth/callback',
-                'scope': 'read_events'
-            }
-            params_str = dict_to_query_params(params)
-            return HttpResponseRedirect(base + params_str)
+            return HttpResponseRedirect(reverse('mytasks'))
+    else:
+        base = settings.CRONOFY_AUTH_URL + "/authorize"
+        params = {
+            'response_type': 'code',
+            'client_id': settings.CRONOFY_CLIENT_ID,
+            'redirect_uri': settings.APP_URL + '/cronofy/oauth/callback',
+            'scope': 'read_events'
+        }
+        params_str = dict_to_query_params(params)
+        return HttpResponseRedirect(base + params_str)
 
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
 
-
+@okta_login_required
 def cronofy_oauth_callback(request):
-    try:
-        _nosession_check(request)
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
-
     return render(request, 'cronofy_oauth_callback.html')
 
 
+@okta_login_required
 def cronofy_access_token(request):
-    try:
-        _nosession_check(request)
-        if request.method == 'POST':
-            client_id = settings.CRONOFY_CLIENT_ID
-            client_secret = settings.CRONOFY_CLIENT_SECRET
-            received_json_data = json.loads(request.body)
-            access_code = received_json_data['code']
+    if request.method == 'POST':
+        client_id = settings.CRONOFY_CLIENT_ID
+        client_secret = settings.CRONOFY_CLIENT_SECRET
+        received_json_data = json.loads(request.body)
+        access_code = received_json_data['code']
 
-            post_data = {
-              "client_id": client_id,
-              "client_secret": client_secret,
-              "grant_type": "authorization_code",
-              "code": access_code,
-              "redirect_uri": settings.APP_URL + "/cronofy/oauth/callback"
-            }
-            result = requests.post(settings.CRONOFY_AUTH_URL + "/token", data=post_data)
-            content = json.loads(result.content)
-            token = content['access_token']
-            request.session['cronofy_access_token'] = token
+        post_data = {
+          "client_id": client_id,
+          "client_secret": client_secret,
+          "grant_type": "authorization_code",
+          "code": access_code,
+          "redirect_uri": settings.APP_URL + "/cronofy/oauth/callback"
+        }
+        result = requests.post(settings.CRONOFY_AUTH_URL + "/token", data=post_data)
+        content = json.loads(result.content)
+        token = content['access_token']
+        request.session['cronofy_access_token'] = token
 
-            if 'event_range' in request.session:
-                if _populate_tasks(request) == STATUS_CODES.NO_TOKEN:
-                    return HttpResponseRedirect(reverse('import_tasks'))
+        if 'event_range' in request.session:
+            if _populate_tasks(request) == STATUS_CODES.NO_TOKEN:
+                return HttpResponseRedirect(reverse('import_tasks'))
 
-            response = HttpResponse()
-            response.status_code = 200
-            return response
-
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+        response = HttpResponse()
+        response.status_code = 200
+        return response
 
     return HttpResponseRedirect(reverse_lazy('home'))
 
@@ -574,43 +509,29 @@ def _populate_tasks(request):
     return STATUS_CODES.SUCCESS
 
 
+@okta_login_required
 def forcecom_auth_init(request):
-    try:
-        _nosession_check(request)
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
-
     return render(request, 'sfdc_auth_init.html')
 
 
+@okta_login_required
 def forcecom_auth_complete(request):
-    try:
-        _nosession_check(request)
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
-
     return render(request, 'sfdc_auth_complete.html')
 
 
+@okta_login_required
 def forcecom_oauth_auth(request, task_id=None):
-    try:
-        _nosession_check(request)
-        client = ForcedotcomOAuthClient()
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
+    client = ForcedotcomOAuthClient()
 
     return HttpResponseRedirect(client.auth_code(task_id))
 
 
+@okta_login_required
 def forcecom_oauth_callback(request):
-    try:
-        _nosession_check(request)
-    except NoSession as e:
-        return HttpResponseRedirect(reverse_lazy('home'))
-
     return render(request, 'forcecom_oauth_callback.html')
 
 
+@okta_login_required
 def forcecom_access_token(request):
     try:
         response = HttpResponse()
@@ -634,6 +555,8 @@ def forcecom_access_token(request):
     return response
 
 
+@okta_login_required
+@sfdc_login_required
 def forcecom_search(request):
     try:
         status = 200
@@ -652,9 +575,6 @@ def forcecom_search(request):
 
         response = json.dumps({'opportunities': opportunities})
 
-    except NoSession or NoSfdcSession as e:
-        response = json.dumps({'opportunities': 'error'})
-        status = 401
     except Exception as e:
         response = json.dumps({'opportunities': 'error'})
         status = e.status_code
@@ -662,3 +582,29 @@ def forcecom_search(request):
 
     return HttpResponse(response, status=status, reason=reason, content_type='application/json; charset=utf8')
 
+
+def _nosession_check(request):
+    if 'user_id' in request.session:
+        return request.session['user_id']
+    else:
+        raise NoSession()
+
+    return None
+
+
+def _forcecom_session_check(request):
+    try:
+        _nosession_check(request)
+        if 'forcecom_access_token' in request.session:
+            token = request.session['forcecom_access_token']
+            client = ForcedotcomClient(token)
+            if client.check_token():
+                return token
+            else:
+                raise NoSfdcSession()
+        else:
+            raise NoSfdcSession()
+    except NoSession as e:
+        raise NoSession()
+
+    return None

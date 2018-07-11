@@ -50,6 +50,7 @@ MYSQL_USER_PWD = os.environ.get('MYSQL_USER_PWD')
 
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
+ISSUER = os.environ.get('ISSUER')
 
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -1,6 +1,6 @@
 import requests
 import json
-from ...api.errors import Unauthorized, APIError
+from calendar_event_app.errors import Unauthorized, APIError
 
 
 class UserClient(object):

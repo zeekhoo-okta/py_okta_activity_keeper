@@ -1,6 +1,6 @@
 from django import forms
 from bootstrap3_datepicker.widgets import DatePickerInput
-from calendar_event_app.api.clients.UserClient import UserClient
+from calendar_event_app.clients import UserClient
 from django.conf import settings
 
 
