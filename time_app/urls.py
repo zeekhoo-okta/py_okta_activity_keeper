@@ -17,7 +17,7 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from calendar_event_app.views import login_view, home_view, logout, register, registration_success,\
-    task_view, my_tasks_view, preferences
+    task_view, multi_task_view, my_tasks_view, preferences
 from calendar_event_app.views import import_options_view, import_options_range_view, \
     import_tasks, cronofy_oauth_callback, cronofy_access_token
 from calendar_event_app.views import forcecom_oauth_callback, forcecom_access_token, forcecom_search
@@ -46,6 +46,8 @@ urlpatterns = [
     # task
     url(r'^task/([a-zA-Z0-9]+)/$', task_view, name='task'),
     url(r'^task/new/$', task_view, name='addtask'),
+    url(r'^multitask/([a-zA-Z0-9]+)/$', multi_task_view, name='multitask'),
+    url(r'^multitask/new$', multi_task_view, name='addmultitask'),
     url(r'^task/$', my_tasks_view, name='mytasks'),
     url(r'^taskaction/([a-zA-Z0-9]+)/$', task_action, name='action'),
 
