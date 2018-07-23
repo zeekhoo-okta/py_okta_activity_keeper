@@ -56,6 +56,38 @@ class AddTaskForm(forms.Form):
             raise forms.ValidationError("Provide a value for time spent", code='err2')
         return self.cleaned_data['time_spent']
 
+class AddMultiTaskForm(forms.Form):
+    activity_date = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
+                                                           attrs={"placeholder": "Due Date",
+                                                                  "class": 'form-control input-sm'})
+                                    )
+
+    subject = forms.CharField(max_length=500, required=True,
+                              widget=forms.TextInput(attrs={'placeholder': 'Subject',
+                                                            'class': 'form-control input-sm'})
+                              )
+
+    opportunity_id = forms.CharField(max_length=30, required=True, widget=forms.HiddenInput)
+
+    def __init__(self, *args, **kwargs):
+        super(AddMultiTaskForm, self).__init__(*args, **kwargs)
+        for counter, i in TYPE_CHOICES[1:]:
+            field_name = 'mine[%s][%s]' % (counter, i[0],)
+            type_name_time = '%s_time' % (i,)
+            #self.fields[field_name] = forms.BooleanField(label=i, required=False)
+            self.fields[type_name_time] = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'placeholder': type_name_time,
+                                                                   'class': 'form-control input-sm'}))
+
+    # def clean_task_type(self):
+    #     if self.cleaned_data['task_type'] == 'None':
+    #         raise forms.ValidationError("Please select a Task Type", code='err1')
+    #     return self.cleaned_data['task_type']
+
+    # def clean_time_spent(self):
+    #     if self.cleaned_data['time_spent'] <= 0:
+    #         raise forms.ValidationError("Provide a value for time spent", code='err2')
+    #     return self.cleaned_data['time_spent']
+
 
 class ImportTaskForm(forms.Form):
     ImportRange = forms.CharField(max_length=30, required=False)

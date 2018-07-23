@@ -14,7 +14,7 @@ from clients.OidcClient import *
 from errors import *
 
 from utils import dict_to_query_params
-from forms import AddTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
+from forms import AddTaskForm, AddMultiTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
 from models import Task, UserPreference, StatusCodes
 from tokens import TokenValidator
 from decorators import okta_login_required, sfdc_login_required
@@ -316,6 +316,78 @@ def task_view(request, p):
         print('There was an error: {}'.format(e.message))
 
     return render(request, 'task.html', {'form': form, 'id': p})
+
+@okta_login_required
+@sfdc_login_required
+def multi_task_view(request, p='multitask'):
+    task = None
+
+    try:
+        _nosession_check(request)
+
+        if p != 'multitask':
+            task = Task.objects.get(pk=p)
+
+        if request.method == 'DELETE':
+            if task:
+                task.status_code = 'C'
+                task.save()
+            response = HttpResponse()
+            response.status_code = 204
+            return response
+    except NoSession as e:
+        return HttpResponseRedirect(reverse_lazy('home'))
+
+    try:
+        token = _forcecom_session_check(request)
+
+        if request.method == 'POST':
+            form = AddMultiTaskForm(request.POST)
+            if form.is_valid():
+                client = ForcedotcomClient(token)
+                activity_date = form.cleaned_data['activity_date'].strftime('%Y-%m-%-d')
+                opportunity_id = form.cleaned_data['opportunity_id']
+
+                #Print Time values
+                for key in request.POST:
+                    if ('time' in key) :
+                        #print(key, )
+                        value = request.POST[key]
+                        #print(key, ":", value)
+                        try:
+                            if int(value) > 0:
+                                # print("Creating Task in Salesforce")   
+                                result = client.post_task(
+                                    opportunity_id,
+                                    form.cleaned_data['subject'],
+                                    activity_date,
+                                    value,                                    
+                                    key.strip('_time')
+                                )
+                        except ValueError as e:
+                            print('There was an error: {}'.format(e.message))                                              
+                return HttpResponseRedirect(reverse('mytasks'))
+        elif task:
+            form = AddMultiTaskForm(initial={
+                'activity_date': task.start.date().strftime('%m/%d/%Y'),
+                'subject': task.summary,
+                'time_spent': '{0:0g}'.format((task.end - task.start).total_seconds() / 60)
+            })
+        else:
+            # blank form
+            form = AddMultiTaskForm(initial={
+                'activity_date': '',
+                'subject': '',
+                'time_spent': 0
+            })        
+    except NoSession as e:
+        return HttpResponseRedirect(reverse_lazy('home'))
+    except NoSfdcSession or Unauthorized as e:
+        return HttpResponseRedirect(reverse('forcecom_auth_init'))
+    except Exception as e:
+        print('There was an error: {}'.format(e.message))
+
+    return render(request, 'multitask.html', {'form': form, 'id': p})
 
 
 @okta_login_required

@@ -55,6 +55,11 @@
               <li><a href="{% url 'addtask' %}">New Activity</a></li>
             {% endif %}
           </ul>
+          <ul class="nav navbar-nav">
+            {% if 'user_id' in request.session %}
+              <li><a href="{% url 'addmultitask' %}">Add Multi Activity</a></li>
+            {% endif %}
+          </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if 'user_id' not in request.session %}
               <li><a href="{% url 'home' %}">Login</a></li>

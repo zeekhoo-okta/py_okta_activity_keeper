@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Add Task{% endblock %}
+
+{% block head %}
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>-->
+{{ form.media }}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+{% endblock head %}
+
+{% block content %}
+<div class="container">
+    <div class="add-task">
+        Multi
+        <form class="form-horizontal" name="TaskForm" action="{% url 'multitask' id %}" method="post" role="form">
+            {% csrf_token %}
+
+            {% for field in form.visible_fields %}
+            <div class="form-group {% if field.errors %} has-error {% endif %}">
+                <div class="col-sm-5">
+                    {{ field }}
+                </div>
+                <div class="help-block">
+                    {{ field.errors }}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="form-group">
+                <div class="hidden">
+                    <input type="text" id="opportunity_id" name="opportunity_id" placeholder="opportunity_id">
+                </div>
+            </div>
+
+            <div class="form-group form-group-sm">
+                <label class="col-sm-1 control-label">Opportunity:  </label>
+                <div class="col-sm-4" id="selectedOp">
+                </div>
+                <div class="col-sm-4" id="selectedOpId">
+                </div>
+            </div>
+            <div class="form-group form-group-sm">
+                <div class="col-sm-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchOp" name="searchString" placeholder="Search">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default btn-sm" type="button" onclick="searchOpptys()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table id="search_table" class = "table table-hover">
+                <thead id="tab_head"></thead>
+                <tbody id="search_results"></tbody>
+            </table>
+            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+        </form>
+
+    </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script type="text/javascript">
+window.onload = selectOp;
+</script>
+{% endblock page_js %}
