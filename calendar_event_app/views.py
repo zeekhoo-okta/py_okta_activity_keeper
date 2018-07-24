@@ -348,24 +348,35 @@ def multi_task_view(request, p='multitask'):
                 activity_date = form.cleaned_data['activity_date'].strftime('%Y-%m-%-d')
                 opportunity_id = form.cleaned_data['opportunity_id']
 
+                total = 0
                 #Print Time values
                 for key in request.POST:
                     if ('time' in key) :
                         #print(key, )
                         value = request.POST[key]
+                        
                         #print(key, ":", value)
                         try:
                             if int(value) > 0:
                                 # print("Creating Task in Salesforce")   
+                                total = total + int(value)
                                 result = client.post_task(
                                     opportunity_id,
                                     form.cleaned_data['subject'],
                                     activity_date,
                                     value,                                    
-                                    key.strip('_time')
-                                )
+                                    key.split('_')[0]
+                                )                                
+
                         except ValueError as e:
-                            print('There was an error: {}'.format(e.message))                                              
+                            print('There was an error: {}'.format(e.message))  
+                    if task:
+                        task.set_completed_time()
+                        task.status_code = 'C'
+                        task.opportunity = opportunity_id
+                        task.subject = form.cleaned_data['subject']
+                        task.time_spent = total                        
+                        task.save()                                            
                 return HttpResponseRedirect(reverse('mytasks'))
         elif task:
             form = AddMultiTaskForm(initial={
