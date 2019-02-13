@@ -64,7 +64,7 @@ INSTALLED_APPS = [
 
     'bootstrap3',
     'django_forms_bootstrap',
-    'bootstrap3_datepicker',
+    'bootstrap3_datetime',
     # 'rest_framework',
 ]
 

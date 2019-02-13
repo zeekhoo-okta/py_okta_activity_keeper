@@ -1,4 +1,3 @@
-from django.conf import settings
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.core.urlresolvers import reverse, reverse_lazy

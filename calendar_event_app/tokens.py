@@ -1,7 +1,3 @@
-# import time
-# from jose import jwt
-# from jose import jws
-# import base64
 import jwt as jwt_python
 from clients.OidcClient import *
 from django.conf import settings

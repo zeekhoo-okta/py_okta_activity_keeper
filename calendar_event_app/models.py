@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from dateutil import tz
 from datetime import datetime
-import requests
 
 from_zone = tz.gettz(settings.TIME_ZONE)
 ama_la = 'America/Los_Angeles'

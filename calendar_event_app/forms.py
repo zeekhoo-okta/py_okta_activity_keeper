@@ -1,34 +1,33 @@
 from django import forms
-from bootstrap3_datepicker.widgets import DatePickerInput
+from bootstrap3_datetime.widgets import DateTimePicker
 from calendar_event_app.clients import UserClient
 from django.conf import settings
 
 
 TYPE_CHOICES = (
     ('None', '---'),
-    ('Other','Other'),
-    ('Rfx','Rfx'),
-    ('POC','POC'),
-    ('Demo/Presentation','Demo/Presentation'),
-    ('Discovery','Discovery'),
-    ('Admin','Admin'),
-    ('Travel','Travel'),
-    ('BVA','BVA'),
-    ('Marketing Event','Marketing Event'),
-    ('Training','Training'),
-    ('Partner','Partner'),
-    ('Customer Support','Customer Support'),
-    ('Mutual Delivery Plan (MDP)','Mutual Delivery Plan (MDP)'),
-    ('Prep Time/Follow-Up','Prep Time/Follow-Up'),
-    ('Solutioning','Solutioning')
+    ('Other', 'Other'),
+    ('Rfx', 'Rfx'),
+    ('POC', 'POC'),
+    ('Demo/Presentation', 'Demo/Presentation'),
+    ('Discovery', 'Discovery'),
+    ('Admin', 'Admin'),
+    ('Travel', 'Travel'),
+    ('BVA', 'BVA'),
+    ('Marketing Event', 'Marketing Event'),
+    ('Training', 'Training'),
+    ('Partner', 'Partner'),
+    ('Customer Support', 'Customer Support'),
+    ('Mutual Delivery Plan (MDP)', 'Mutual Delivery Plan (MDP)'),
+    ('Prep Time/Follow-Up', 'Prep Time/Follow-Up'),
+    ('Solutioning', 'Solutioning')
 )
 
 
 class AddTaskForm(forms.Form):
-    activity_date = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
-                                                           attrs={"placeholder": "Due Date",
-                                                                  "class": 'form-control input-sm'})
-                                    )
+    activity_date = forms.DateField(
+        widget=DateTimePicker(options={"format": "MM/DD/YYYY"},
+                              attrs={"placeholder": "Due Date", "class": 'form-control input-sm'}))
 
     subject = forms.CharField(max_length=500, required=True,
                               widget=forms.TextInput(attrs={'placeholder': 'Subject',
@@ -57,9 +56,9 @@ class AddTaskForm(forms.Form):
         return self.cleaned_data['time_spent']
 
 class AddMultiTaskForm(forms.Form):
-    activity_date = forms.DateField(widget=DatePickerInput(format="mm/dd/yyyy",
-                                                           attrs={"placeholder": "Due Date",
-                                                                  "class": 'form-control input-sm'})
+    activity_date = forms.DateField(widget=DateTimePicker(options={"format": "mm/dd/yyyy", "pickTime": False},
+                                                          attrs={"placeholder": "Due Date",
+                                                                 "class": 'form-control input-sm'})
                                     )
 
     subject = forms.CharField(max_length=500, required=True,
