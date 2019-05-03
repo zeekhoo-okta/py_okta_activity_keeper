@@ -26,7 +26,7 @@ DEBUG = os.environ.get('DEBUG')
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]',
                  'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com',
                  'zaasure-dev.us-west-2.elasticbeanstalk.com',
-                 'alwaysaasure.com', 'www.alwaysaasure.com']
+                 'alwaysaasure.com', 'www.alwaysaasure.com', 'www.okta247.com']
 
 # Application definition
 
