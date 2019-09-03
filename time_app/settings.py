@@ -23,10 +23,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = os.environ.get('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]',
-                 'activity-timekeeper-dev.us-west-2.elasticbeanstalk.com',
-                 'zaasure-dev.us-west-2.elasticbeanstalk.com',
-                 'alwaysaasure.com', 'www.alwaysaasure.com', 'www.okta247.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 
 # Application definition
 
