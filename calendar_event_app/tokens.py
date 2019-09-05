@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import jwt as jwt_python
-from clients.OidcClient import *
+from .clients.OidcClient import *
 from django.conf import settings
 
 
-class TokenValidator(object):
+class TokenValidator:
     def __init__(self, keys=[]):
         self.keys = keys
 
@@ -19,7 +20,7 @@ class TokenValidator(object):
 
         data = {
             'grant_type': 'authorization_code',
-            'code': str(auth_code),
+            'code': auth_code,
             'scope': 'openid profile',
             'redirect_uri': '{}/oidc/callback'.format(settings.APP_URL)
         }
@@ -34,7 +35,7 @@ class TokenValidator(object):
             if 'id_token' in response:
                 result['id_token'] = response['id_token']
 
-        return result if len(result.keys()) > 0 else None
+        return result if len(list(result.keys())) > 0 else None
 
     def validate_id_token(self, token, nonce):
         try:

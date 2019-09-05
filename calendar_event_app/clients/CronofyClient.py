@@ -4,7 +4,7 @@ from calendar_event_app.errors import Unauthorized, APIError
 from calendar_event_app.utils import dict_to_query_params
 
 
-class CronofyClient(object):
+class CronofyClient:
     def __init__(self, token):
         self.base_url = settings.CRONOFY_API_URL
         self.version = '1'

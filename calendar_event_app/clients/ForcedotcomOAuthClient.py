@@ -1,11 +1,11 @@
 import requests
+import json
 from django.conf import settings
 from calendar_event_app.errors import Unauthorized, APIError
 from calendar_event_app.utils import dict_to_query_params
-import json
 
 
-class ForcedotcomOAuthClient(object):
+class ForcedotcomOAuthClient:
     def __init__(self):
         self.base_url = settings.SFDC_URL + '/services/oauth2'
         self.app_url = settings.APP_URL

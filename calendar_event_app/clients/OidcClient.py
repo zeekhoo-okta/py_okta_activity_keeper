@@ -1,17 +1,20 @@
+from builtins import bytes
 import requests
 import base64
 
 
-class OidcClient(object):
+class OidcClient:
 
     def __init__(self, issuer):
         self.issuer = issuer
 
     def introspect(self, client_id, client_secret, token, hint):
 
-        basic = base64.b64encode(client_id + ":" + client_secret)
+        data = '{0}:{1}'.format(client_id, client_secret)
+
+        basic = base64.b64encode(bytes(data, 'utf-8'))
         headers = {
-            'Authorization': 'Basic ' + basic
+            'Authorization': 'Basic ' + basic.decode('utf-8')
         }
         introspect = {
             "token": token,

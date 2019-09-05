@@ -73,7 +73,7 @@ class UserPreference(models.Model):
         db_table = "user_preference"
 
 
-class StatusCodes(object):
+class StatusCodes:
     def __init__(self):
         self.NO_TOKEN = 'NO_TOKEN'
         self.NO_CALENDAR = 'NO_CALENDAR'

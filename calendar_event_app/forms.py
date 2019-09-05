@@ -55,11 +55,11 @@ class AddTaskForm(forms.Form):
             raise forms.ValidationError("Provide a value for time spent", code='err2')
         return self.cleaned_data['time_spent']
 
+
 class AddMultiTaskForm(forms.Form):
-    activity_date = forms.DateField(widget=DateTimePicker(options={"format": "mm/dd/yyyy", "pickTime": False},
-                                                          attrs={"placeholder": "Due Date",
-                                                                 "class": 'form-control input-sm'})
-                                    )
+    activity_date = forms.DateField(
+        widget=DateTimePicker(options={"format": "MM/DD/YYYY"},
+                              attrs={"placeholder": "Due Date", "class": 'form-control input-sm'}))
 
     subject = forms.CharField(max_length=500, required=True,
                               widget=forms.TextInput(attrs={'placeholder': 'Subject',
@@ -71,11 +71,15 @@ class AddMultiTaskForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AddMultiTaskForm, self).__init__(*args, **kwargs)
         for counter, i in TYPE_CHOICES[1:]:
-            field_name = 'mine[%s][%s]' % (counter, i[0],)
+            # field_name = 'mine[%s][%s]' % (counter, i[0],)
             type_name_time = '%s_time' % (i,)
             #self.fields[field_name] = forms.BooleanField(label=i, required=False)
-            self.fields[type_name_time] = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'placeholder': type_name_time,
-                                                                   'class': 'form-control input-sm'}))
+            self.fields[type_name_time] = forms.IntegerField(required=False,
+                                                             widget=forms.NumberInput(
+                                                                 attrs={'placeholder': type_name_time,
+                                                                        'class': 'form-control input-sm'
+                                                                        })
+                                                             )
 
     # def clean_task_type(self):
     #     if self.cleaned_data['task_type'] == 'None':

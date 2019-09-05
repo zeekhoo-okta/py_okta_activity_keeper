@@ -27,10 +27,12 @@ function oauth2Callback(url, redirect) {
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send(JSON.stringify({"code": access_code}));
     xhttp.onreadystatechange = function() {
-        res = xhttp.status;
-        if (res.status_code == 401) {
+        status = xhttp.status;
+        if (status == 401) {
             window.location.href = '/login';
         }
-        window.location.href = redirect;
+        if (status == 200) {
+            window.location.href = redirect;
+        }
     }
 }

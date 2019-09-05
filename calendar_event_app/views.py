@@ -1,22 +1,23 @@
-from datetime import date
+from past.utils import old_div
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 
-from clients.CronofyClient import *
-from clients.ForcedotcomClient import *
-from clients.ForcedotcomOAuthClient import *
-from clients.UserClient import UserClient
-from clients.OidcClient import *
-from errors import *
+from .clients.CronofyClient import *
+from .clients.ForcedotcomClient import *
+from .clients.ForcedotcomOAuthClient import *
+from .clients.UserClient import UserClient
+from .clients.OidcClient import *
+from .errors import *
 
-from utils import dict_to_query_params
-from forms import AddTaskForm, AddMultiTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
-from models import Task, UserPreference, StatusCodes
-from tokens import TokenValidator
-from decorators import okta_login_required, sfdc_login_required
+from .utils import dict_to_query_params
+from .forms import AddTaskForm, AddMultiTaskForm, ImportTaskForm, PreferenceForm, RegistrationForm
+from .models import Task, UserPreference, StatusCodes
+from .tokens import TokenValidator
+from .decorators import okta_login_required, sfdc_login_required
 
 
 OKTA_ORG = ''.join(['https://', settings.OKTA_ORG])
@@ -157,12 +158,12 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-            firstName = form.cleaned_data['firstName']
-            lastName = form.cleaned_data['lastName']
+            first_name = form.cleaned_data['firstName']
+            last_name = form.cleaned_data['lastName']
 
             try:
                 client = UserClient(OKTA_ORG, settings.API_TOKEN)
-                response = client.create_user(email, firstName, lastName)
+                response = client.create_user(email, first_name, last_name)
                 if response['status_code'] == 200:
                     return HttpResponseRedirect(reverse('registration_success'))
             except Exception as e:
@@ -237,7 +238,7 @@ def task_action(request, p):
                 None,
                 task.summary,
                 activity_date,
-                (task.end - task.start).total_seconds() / 60,
+                old_div((task.end - task.start).total_seconds(), 60),
                 action
             )
             status = result['status_code']
@@ -246,7 +247,7 @@ def task_action(request, p):
                     task.status_code = 'C'
                     task.save()
     except Exception as e:
-        print('There was an error: {}'.format(e.message))
+        print('There was an error: {}'.format(e))
 
     return response
 
@@ -302,7 +303,7 @@ def task_view(request, p):
             form = AddTaskForm(initial={
                 'activity_date': task.start.date().strftime('%m/%d/%Y'),
                 'subject': task.summary,
-                'time_spent': '{0:0g}'.format((task.end - task.start).total_seconds() / 60)
+                'time_spent': '{0:0g}'.format(old_div((task.end - task.start).total_seconds(), 60))
             })
         else:
             # blank form
@@ -312,9 +313,10 @@ def task_view(request, p):
                 'time_spent': 0
             })
     except Exception as e:
-        print('There was an error: {}'.format(e.message))
+        print('There was an error: {}'.format(e))
 
     return render(request, 'task.html', {'form': form, 'id': p})
+
 
 @okta_login_required
 @sfdc_login_required
@@ -348,16 +350,11 @@ def multi_task_view(request, p='multitask'):
                 opportunity_id = form.cleaned_data['opportunity_id']
 
                 total = 0
-                #Print Time values
                 for key in request.POST:
                     if ('time' in key) :
-                        #print(key, )
                         value = request.POST[key]
-                        
-                        #print(key, ":", value)
                         try:
-                            if int(value) > 0:
-                                # print("Creating Task in Salesforce")   
+                            if value.isdigit() and int(value) > 0:
                                 total = total + int(value)
                                 result = client.post_task(
                                     opportunity_id,
@@ -368,7 +365,7 @@ def multi_task_view(request, p='multitask'):
                                 )                                
 
                         except ValueError as e:
-                            print('There was an error: {}'.format(e.message))  
+                            print('There was an error: {}'.format(e))
                     if task:
                         task.set_completed_time()
                         task.status_code = 'C'
@@ -381,7 +378,7 @@ def multi_task_view(request, p='multitask'):
             form = AddMultiTaskForm(initial={
                 'activity_date': task.start.date().strftime('%m/%d/%Y'),
                 'subject': task.summary,
-                'time_spent': '{0:0g}'.format((task.end - task.start).total_seconds() / 60)
+                'time_spent': '{0:0g}'.format(old_div((task.end - task.start).total_seconds(), 60))
             })
         else:
             # blank form
@@ -395,7 +392,7 @@ def multi_task_view(request, p='multitask'):
     except NoSfdcSession or Unauthorized as e:
         return HttpResponseRedirect(reverse('forcecom_auth_init'))
     except Exception as e:
-        print('There was an error: {}'.format(e.message))
+        print('There was an error: {}'.format(e))
 
     return render(request, 'multitask.html', {'form': form, 'id': p})
 

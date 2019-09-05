@@ -3,7 +3,7 @@ import json
 from calendar_event_app.errors import Unauthorized, APIError
 
 
-class UserClient(object):
+class UserClient:
 
     def __init__(self, base_url, api_token):
         self.base_url = base_url + '/api/v1/users'

@@ -1,11 +1,14 @@
 import requests
+import json
+import urllib.parse
 from django.conf import settings
 from calendar_event_app.errors import Unauthorized, APIError
-import json
-import urllib
+
+from future import standard_library
+standard_library.install_aliases()
 
 
-class ForcedotcomClient(object):
+class ForcedotcomClient:
     def __init__(self, token):
         self.base_url = settings.SFDC_URL
         self.version = settings.SFDC_API_VERSION
@@ -23,7 +26,6 @@ class ForcedotcomClient(object):
             raise ValueError('Invalid token')
 
         self.headers = {
-            # 'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         }
@@ -54,7 +56,7 @@ class ForcedotcomClient(object):
         if self.pre_sales_tasks_id:
             return self.pre_sales_tasks_id
 
-        encoded = urllib.quote_plus(record_type)
+        encoded = urllib.parse.quote_plus(record_type)
         q = 'SELECT+id+from+RecordType+WHERE+name%3D%27' + encoded + '%27'
 
         try:
