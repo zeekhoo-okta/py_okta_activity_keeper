@@ -1,6 +1,6 @@
 certifi==2019.6.16
 chardet==3.0.4
-Django==2.2.5
+Django==2.2.8
 django-bootstrap3==11.1.0
 django-bootstrap3-datetimepicker-2==2.8.2
 django-forms-bootstrap==3.1.0
